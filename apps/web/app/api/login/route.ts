@@ -5,6 +5,14 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
+  if (body?.action === "logout") {
+    const response = NextResponse.json({ success: true });
+    response.cookies.delete("nexora_access_token");
+    response.cookies.delete("nexora_refresh_token");
+    response.cookies.delete("nexora_demo_mode");
+    return response;
+  }
+
   try {
     const backendResponse = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
       method: "POST",
@@ -36,8 +44,6 @@ export async function POST(request: NextRequest) {
     });
     return response;
   } catch {
-    // Backend is offline/unreachable. Enter the local ERP demo so the
-    // frontend can still be demonstrated on a phone or laptop.
     if (!body.email || !body.password) {
       return NextResponse.json({ message: "Enter an email and password to continue in demo mode." }, { status: 400 });
     }
