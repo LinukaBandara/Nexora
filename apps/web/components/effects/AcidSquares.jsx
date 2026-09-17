@@ -38,7 +38,6 @@ void main() {
   vec2 uv = gl_FragCoord.xy / uResolution.xy;
   float aspect = uResolution.x / max(uResolution.y, 1.0);
   vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
-
   float t = uTime * uSpeed;
   vec2 mouse = (uMouse - 0.5) * vec2(aspect, 1.0);
   float mouseInfluence = exp(-dot(p - mouse, p - mouse) * 5.0) * 0.035;
@@ -53,8 +52,7 @@ void main() {
       vec2 grid = vec2(0.105, 0.13);
       vec2 center = cell * grid;
       float phase = hash21(cell + 19.7);
-      float drift = sin(t * (0.55 + phase * 0.5) + phase * 6.2831) * 0.025;
-      center.y += drift;
+      center.y += sin(t * (0.55 + phase * 0.5) + phase * 6.2831) * 0.025;
       center.x += cos(t * 0.32 + phase * 8.0) * 0.012;
 
       vec2 local = p - center;
@@ -75,9 +73,7 @@ void main() {
   float vignette = 1.0 - smoothstep(0.3, 0.95, length((uv - 0.5) * vec2(0.9, 1.1)));
   color *= 0.72 + vignette * 0.48;
   color *= uBrightness;
-
-  float grain = hash21(gl_FragCoord.xy + uTime) - 0.5;
-  color += grain * 0.018;
+  color += (hash21(gl_FragCoord.xy + uTime) - 0.5) * 0.018;
   gl_FragColor = vec4(clamp(color, 0.0, 1.0), uOpacity);
 }`;
 
@@ -135,7 +131,6 @@ export default function AcidSquares({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const gl = canvas.getContext("webgl", { alpha: true, antialias: true, premultipliedAlpha: true });
     if (!gl) return;
 
@@ -150,7 +145,6 @@ export default function AcidSquares({
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
-
     const position = gl.getAttribLocation(program, "aPosition");
     const uniforms = {
       resolution: gl.getUniformLocation(program, "uResolution"),
@@ -171,7 +165,7 @@ export default function AcidSquares({
     const rgb3 = hexToRgb(color3);
     const mouse = { x: 0.5, y: 0.5 };
     let animationFrame = 0;
-    let start = performance.now();
+    const start = performance.now();
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
@@ -225,5 +219,5 @@ export default function AcidSquares({
     };
   }, [color1, color2, color3, speed, density, glow, brightness, opacity, mouseInteraction]);
 
-  return <canvas ref={canvasRef} className={`acid-squares-canvas ${className}`.trim()} aria-hidden="true" />;
+  return <canvas ref={canvasRef} className={`acid-squares-container ${className}`.trim()} aria-hidden="true" />;
 }
