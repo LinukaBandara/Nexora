@@ -4,35 +4,49 @@
 
 @import "../styles/tokens.css";
 
+html,
 body {
-  background: linear-gradient(
-    135deg,
-    var(--color-page-gradient-start),
-    var(--color-page-gradient-end),
-    var(--color-page-gradient-start)
-  );
-  background-size: 200% 200%;
-  animation: gradient-drift 18s ease infinite;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
   color: var(--color-text-primary);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-body);
-  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* A slow, subtle background drift - not a flashy effect, just enough
-   motion that the app feels alive rather than a static screenshot. Kept
-   slow (18s) and low-amplitude on purpose - fast/large motion here would
-   be distracting behind actual work screens. */
-@keyframes gradient-drift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  body { animation: none; }
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
 * {
   border-color: var(--color-border);
+}
+
+::selection {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
