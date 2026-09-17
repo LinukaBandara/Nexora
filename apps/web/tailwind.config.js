@@ -10,6 +10,11 @@ module.exports = {
           hover: "var(--color-primary-hover)",
           soft: "var(--color-primary-soft)",
         },
+        accent: {
+          lime: "var(--color-accent-lime)",
+          "lime-soft": "var(--color-accent-lime-soft)",
+          "lime-text": "var(--color-accent-lime-text)",
+        },
         background: "var(--color-background)",
         surface: {
           DEFAULT: "var(--color-surface)",

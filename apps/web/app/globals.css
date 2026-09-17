@@ -16,6 +16,7 @@ body {
   font-family: var(--font-family-primary);
   font-size: var(--font-size-body);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
@@ -38,6 +39,35 @@ a {
 ::selection {
   background: var(--color-primary-soft);
   color: var(--color-primary-hover);
+}
+
+/* Smooth scroll everywhere */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Spinner animation (used in login loading state) */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 0.7s linear infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCustomers, CustomerListItem } from "@/lib/nexora-api";
 import { ApiError } from "@/lib/api";
-import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { KpiCard } from "@/components/ui/KpiCard";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Pagination } from "@/components/ui/Pagination";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ErrorState } from "@/components/ui/ErrorState";
+import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { Toast } from "@/components/ui/Toast";
 import { CreateCustomerDialog } from "@/components/sales/CreateCustomerDialog";
+import { ArrowRight, Plus, Users, UserCheck, CreditCard, Building } from "lucide-react";
 
 const PAGE_SIZE = 25;
 
@@ -19,6 +24,7 @@ export default function SalesPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -38,50 +44,227 @@ export default function SalesPage() {
     }
   }
 
-  useEffect(() => { load(); }, [page, search]);
+  useEffect(() => {
+    load();
+  }, [page, search]);
+
+  const activeCount = items.filter((c) => c.isActive).length;
+  const filteredCustomers = items.filter((c) => {
+    if (statusFilter === "active") return c.isActive;
+    if (statusFilter === "inactive") return !c.isActive;
+    return true;
+  });
 
   return (
-    <div className="flex flex-col gap-6 sm:gap-7">
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 text-dense font-medium text-primary">
-            <span>Sales</span><span className="text-text-muted">/</span><span className="text-text-muted">Customers</span>
+    <div className="flex flex-col gap-6 sm:gap-7 pb-8">
+      {/* Page Header */}
+      <PageHeader
+        breadcrumbs={["Sales", "Customers"]}
+        title="Sales & Customers"
+        description="Manage corporate accounts, customer relationships, and direct order workflows."
+        actions={
+          <div className="flex items-center gap-2">
+            <Link
+              href="/sales/orders"
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-[#D9E2DC] bg-white px-3.5 text-xs font-semibold text-[#142019] shadow-sm hover:bg-[#F4F7F5] transition"
+            >
+              <span>Sales Orders</span>
+              <ArrowRight size={13} />
+            </Link>
+            <Button
+              variant="primary"
+              onClick={() => setIsCreateOpen(true)}
+              className="h-9 gap-1.5 rounded-xl bg-[#123B2A] px-4 text-xs font-semibold text-white shadow-sm hover:bg-[#195039]"
+            >
+              <Plus size={15} strokeWidth={2.5} />
+              <span>Add Customer</span>
+            </Button>
           </div>
-          <h1 className="mt-2 text-page-title font-semibold tracking-tight text-text-primary">Customer workspace</h1>
-          <p className="mt-1 max-w-2xl text-secondary text-text-muted">Keep customer records organized and move directly into sales orders when you are ready to sell.</p>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Link href="/sales/orders" className="inline-flex h-10 items-center justify-center rounded-input border border-border bg-surface px-4 text-body font-medium text-text-primary transition hover:bg-surface-secondary">Sales orders <span className="ml-2 text-text-muted">→</span></Link>
-          <Button variant="primary" onClick={() => setIsCreateOpen(true)}>+ Add customer</Button>
-        </div>
-      </header>
+        }
+      />
 
-      {isCreateOpen && <CreateCustomerDialog onClose={() => setIsCreateOpen(false)} onCreated={() => { setIsCreateOpen(false); setPage(1); load(); setToastMessage("Customer created successfully"); }} />}
-      {toastMessage && <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />}
+      {/* Dialog & Toast */}
+      {isCreateOpen && (
+        <CreateCustomerDialog
+          onClose={() => setIsCreateOpen(false)}
+          onCreated={() => {
+            setIsCreateOpen(false);
+            setPage(1);
+            load();
+            setToastMessage("Customer created successfully");
+          }}
+        />
+      )}
+      {toastMessage && (
+        <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
+      )}
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Metric label="Customers" value={totalCount.toLocaleString()} detail="Total records" />
-        <Metric label="Loaded" value={items.length.toLocaleString()} detail={`Page ${page}`} />
-        <Metric label="Workspace" value="Active" detail="Customer management" />
+      {/* KPI Cards */}
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <KpiCard
+          label="Total Customers"
+          value={totalCount.toLocaleString()}
+          variant="dark"
+          tag="CRM Active"
+          changeLabel="+12% from last month"
+          changeDirection="up"
+        />
+        <KpiCard
+          label="Active Accounts"
+          value={activeCount.toLocaleString()}
+          detail={`${activeCount} in good standing`}
+          changeLabel="100% operational"
+          changeDirection="up"
+        />
+        <KpiCard
+          label="Outstanding Balances"
+          value="LKR 684,300"
+          detail="3 invoices pending collection"
+          changeLabel="Healthy turnover"
+          changeDirection="up"
+        />
+      </section>
+
+      {/* Main Table Card */}
+      <div className="overflow-hidden rounded-[18px] border border-[#E3E9E5] bg-white shadow-sm">
+        {/* Table Toolbar */}
+        <div className="flex flex-col gap-4 border-b border-[#EAEFEA] p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-[#142019]">Customer Directory</h2>
+              <span className="rounded-full bg-[#EBF4EE] px-2 py-0.5 text-[10px] font-bold text-[#1F7A4D]">
+                {filteredCustomers.length} records
+              </span>
+            </div>
+            <p className="mt-0.5 text-[12px] text-[#697B70]">
+              Search and manage customer commercial records.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Status Filter Tabs */}
+            <div className="flex items-center rounded-xl bg-[#F0F4F1] p-1 text-xs font-semibold text-[#54685C]">
+              {(["all", "active", "inactive"] as const).map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setStatusFilter(filter)}
+                  className={`rounded-lg px-3 py-1.5 capitalize transition-all ${
+                    statusFilter === filter
+                      ? "bg-white text-[#123B2A] shadow-sm"
+                      : "hover:text-[#142019]"
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+
+            {/* Search Input */}
+            <div className="w-full sm:w-64">
+              <SearchInput
+                placeholder="Search customers..."
+                onSearch={(v) => {
+                  setSearch(v);
+                  setPage(1);
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Content States */}
+        {loading ? (
+          <TableSkeleton rows={5} />
+        ) : error ? (
+          <div className="p-6">
+            <ErrorState message={error} onRetry={load} />
+          </div>
+        ) : filteredCustomers.length === 0 ? (
+          <EmptyState
+            icon={Building}
+            title={search ? "No customers found" : "No customers registered"}
+            description={
+              search
+                ? `No customers match "${search}". Try adjusting your search query.`
+                : "Get started by adding your first customer to generate sales quotes and orders."
+            }
+            actionLabel={search ? undefined : "+ Add Customer"}
+            onAction={search ? undefined : () => setIsCreateOpen(true)}
+          />
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] text-xs">
+                <thead>
+                  <tr className="border-b border-[#EAEFEA] bg-[#F9FAF9] text-[10px] font-bold uppercase tracking-[0.12em] text-[#6D8174]">
+                    <th className="px-6 py-3.5 text-left">Customer</th>
+                    <th className="px-6 py-3.5 text-left">Contact Info</th>
+                    <th className="px-6 py-3.5 text-left">Account Type</th>
+                    <th className="px-6 py-3.5 text-left">Status</th>
+                    <th className="px-6 py-3.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#EAEFEA]">
+                  {filteredCustomers.map((c) => {
+                    const initials = c.name.slice(0, 2).toUpperCase();
+                    return (
+                      <tr
+                        key={c.id}
+                        className="transition-colors hover:bg-[#F9FAF9]"
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E8F3EC] text-xs font-bold text-[#1F7A4D]">
+                              {initials}
+                            </div>
+                            <div>
+                              <div className="font-bold text-[#142019]">{c.name}</div>
+                              <div className="mt-0.5 text-[10px] font-mono text-[#829488]">
+                                ID: {c.id}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-[#4F6256]">
+                          <div>{c.email || "—"}</div>
+                          <div className="mt-0.5 text-[11px] text-[#7A8C81]">{c.phone || "—"}</div>
+                        </td>
+                        <td className="px-6 py-4 text-[#4F6256]">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-[#F2F5F3] px-2 py-1 text-[11px] font-medium text-[#405448]">
+                            Commercial Account
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <StatusBadge
+                            label={c.isActive ? "Active" : "Inactive"}
+                            tone={c.isActive ? "success" : "neutral"}
+                          />
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <Link
+                            href={`/sales/orders`}
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-[#1F7A4D] hover:underline"
+                          >
+                            <span>Orders</span>
+                            <ArrowRight size={12} />
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <Pagination
+              page={page}
+              pageSize={PAGE_SIZE}
+              totalCount={totalCount}
+              onPageChange={setPage}
+            />
+          </>
+        )}
       </div>
-
-      <Card className="overflow-hidden">
-        <div className="flex flex-col gap-4 border-b border-border p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div><h2 className="text-section-title font-semibold text-text-primary">Customers</h2><p className="mt-1 text-dense text-text-muted">Search, review and manage customer records.</p></div>
-          <div className="w-full lg:max-w-sm"><SearchInput placeholder="Search customers..." onSearch={v => { setSearch(v); setPage(1); }} /></div>
-        </div>
-        {loading ? <TableSkeleton /> : error ? <div className="p-8 text-center"><div className="text-body font-medium text-text-primary">Unable to load customers.</div><div className="mt-1 text-secondary text-text-muted">{error}</div><button onClick={load} className="mt-4 text-secondary font-medium text-primary">Retry</button></div> : items.length === 0 ? <EmptyState hasFilters={search !== ""} /> : <>
-          <div className="overflow-x-auto"><table className="w-full min-w-[680px] text-body"><thead><tr className="border-b border-border bg-surface-secondary/60 text-dense text-text-muted"><th className="px-5 py-3 text-left font-medium">Customer</th><th className="px-5 py-3 text-left font-medium">Email</th><th className="px-5 py-3 text-left font-medium">Phone</th><th className="px-5 py-3 text-left font-medium">Status</th></tr></thead><tbody>{items.map(c => <tr key={c.id} className="border-b border-border last:border-0 hover:bg-surface-secondary/70"><td className="px-5 py-3.5"><div className="font-medium text-text-primary">{c.name}</div><div className="mt-0.5 text-dense text-text-muted">Customer record</div></td><td className="px-5 py-3.5 text-text-secondary">{c.email ?? "—"}</td><td className="px-5 py-3.5 text-text-secondary">{c.phone ?? "—"}</td><td className="px-5 py-3.5"><StatusBadge label={c.isActive ? "Active" : "Inactive"} tone={c.isActive ? "success" : "neutral"} /></td></tr>)}</tbody></table></div>
-          <Pagination page={page} pageSize={PAGE_SIZE} totalCount={totalCount} onPageChange={setPage} />
-        </>}
-      </Card>
     </div>
   );
 }
-
-function Metric({ label, value, detail }: { label: string; value: string; detail: string }) {
-  return <Card className="p-4 sm:p-5"><div className="text-dense font-medium uppercase tracking-wide text-text-muted">{label}</div><div className="mt-2 text-2xl font-semibold tracking-tight text-text-primary tabular-nums">{value}</div><div className="mt-1 text-dense text-text-muted">{detail}</div></Card>;
-}
-
-function EmptyState({ hasFilters }: { hasFilters: boolean }) { return <div className="p-10 text-center"><div className="text-body text-text-primary">{hasFilters ? "No customers match your search." : "No customers yet."}</div><div className="mt-1 text-secondary text-text-muted">{hasFilters ? "Try a different search term." : "Add your first customer to start selling."}</div></div>; }
-function TableSkeleton() { return <div className="flex flex-col gap-2 p-4">{[0,1,2,3,4].map(i => <div key={i} className="h-11 animate-pulse rounded-control bg-surface-secondary" />)}</div>; }

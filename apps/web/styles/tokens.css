@@ -2,6 +2,9 @@
   --color-primary: #1F7A4D;
   --color-primary-hover: #17603B;
   --color-primary-soft: #E6F3EB;
+  --color-accent-lime: #8EE04E;
+  --color-accent-lime-soft: #F0FCE7;
+  --color-accent-lime-text: #19431A;
 
   --color-page-gradient-start: #FFFFFF;
   --color-page-gradient-end: #FFFFFF;
@@ -35,7 +38,7 @@
   --color-info: #2F6F5A;
   --color-info-bg: #E8F1ED;
 
-  --font-family-primary: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-family-primary: var(--font-inter), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-size-display: 36px;
   --font-size-page-title: 28px;
   --font-size-section-title: 18px;
@@ -43,8 +46,8 @@
   --font-size-body: 14px;
   --font-size-secondary: 13px;
   --font-size-dense: 12px;
-  --font-weight-heading: 650;
-  --font-weight-label: 550;
+  --font-weight-heading: 700;
+  --font-weight-label: 600;
   --font-weight-body: 400;
 
   --space-1: 4px;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
 import { ApiError } from "@/lib/api";
@@ -12,8 +12,8 @@ interface CreateProductDialogProps {
 }
 
 const inputClass =
-  "w-full rounded-input border border-border px-3 py-2 text-body focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
-const labelClass = "mb-1 block text-secondary font-medium text-text-secondary";
+  "w-full rounded-xl border border-[#D5DDD8] bg-white px-3.5 py-2.5 text-xs text-[#142019] placeholder:text-[#91A297] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 transition-all";
+const labelClass = "mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[#4D6054]";
 
 export function CreateProductDialog({ onClose, onCreated }: CreateProductDialogProps) {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -27,7 +27,7 @@ export function CreateProductDialog({ onClose, onCreated }: CreateProductDialogP
   const [unitId, setUnitId] = useState("");
   const [costPrice, setCostPrice] = useState("0");
   const [sellingPrice, setSellingPrice] = useState("0");
-  const [reorderLevel, setReorderLevel] = useState("0");
+  const [reorderLevel, setReorderLevel] = useState("10");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,67 +67,124 @@ export function CreateProductDialog({ onClose, onCreated }: CreateProductDialogP
   }
 
   return (
-    <Dialog title="Add product" onClose={onClose}>
+    <Dialog title="Add product to catalog" onClose={onClose}>
       {lookupsLoading ? (
-        <div className="py-6 text-center text-body text-text-muted">Loading...</div>
+        <div className="py-8 text-center text-xs text-[#7A8E82]">Loading category and unit data...</div>
       ) : lookupsError ? (
-        <div className="py-6 text-center text-body text-danger">{lookupsError}</div>
+        <div className="py-6 text-center text-xs text-[#C84A4A]">{lookupsError}</div>
       ) : categories.length === 0 || units.length === 0 ? (
-        <div className="py-6 text-center text-body text-text-muted">
-          You need at least one category and one unit before creating a product.
+        <div className="py-6 text-center text-xs text-[#7A8E82]">
+          You need at least one category and unit before creating products.
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className={labelClass}>SKU</label>
-              <input required value={sku} onChange={(e) => setSku(e.target.value)} className={inputClass} />
+              <label className={labelClass}>SKU / Item Code *</label>
+              <input
+                required
+                value={sku}
+                onChange={(e) => setSku(e.target.value)}
+                placeholder="e.g. NX-100"
+                className={inputClass}
+              />
             </div>
             <div>
-              <label className={labelClass}>Name</label>
-              <input required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+              <label className={labelClass}>Product Name *</label>
+              <input
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Drip Irrigation Valve"
+                className={inputClass}
+              />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className={labelClass}>Category</label>
-              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputClass}>
+              <label className={labelClass}>Category *</label>
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className={inputClass}
+              >
                 {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className={labelClass}>Unit</label>
-              <select value={unitId} onChange={(e) => setUnitId(e.target.value)} className={inputClass}>
+              <label className={labelClass}>Unit of Measurement *</label>
+              <select
+                value={unitId}
+                onChange={(e) => setUnitId(e.target.value)}
+                className={inputClass}
+              >
                 {units.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name} ({u.abbreviation})</option>
+                  <option key={u.id} value={u.id}>
+                    {u.name} ({u.abbreviation})
+                  </option>
                 ))}
               </select>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label className={labelClass}>Cost price</label>
-              <input type="number" min="0" step="0.01" value={costPrice} onChange={(e) => setCostPrice(e.target.value)} className={inputClass} />
+              <label className={labelClass}>Cost Price (LKR)</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={costPrice}
+                onChange={(e) => setCostPrice(e.target.value)}
+                className={inputClass}
+              />
             </div>
             <div>
-              <label className={labelClass}>Selling price</label>
-              <input type="number" min="0" step="0.01" value={sellingPrice} onChange={(e) => setSellingPrice(e.target.value)} className={inputClass} />
+              <label className={labelClass}>Selling Price (LKR)</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={sellingPrice}
+                onChange={(e) => setSellingPrice(e.target.value)}
+                className={inputClass}
+              />
             </div>
             <div>
-              <label className={labelClass}>Reorder level</label>
-              <input type="number" min="0" step="1" value={reorderLevel} onChange={(e) => setReorderLevel(e.target.value)} className={inputClass} />
+              <label className={labelClass}>Reorder Level</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={reorderLevel}
+                onChange={(e) => setReorderLevel(e.target.value)}
+                className={inputClass}
+              />
             </div>
           </div>
 
-          {error && <div className="rounded-input bg-danger-bg px-3 py-2 text-secondary text-danger">{error}</div>}
+          {error && (
+            <div className="rounded-xl border border-[#F5C2C2] bg-[#FDF5F5] p-3 text-xs font-medium text-[#C84A4A]">
+              {error}
+            </div>
+          )}
 
-          <div className="mt-1 flex justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={submitting}>{submitting ? "Creating..." : "Create product"}</Button>
+          <div className="mt-2 flex justify-end gap-2.5">
+            <Button type="button" variant="secondary" onClick={onClose} className="rounded-xl text-xs">
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="rounded-xl bg-[#123B2A] text-xs font-semibold text-white hover:bg-[#184F38]"
+            >
+              {submitting ? "Saving..." : "Create product"}
+            </Button>
           </div>
         </form>
       )}
