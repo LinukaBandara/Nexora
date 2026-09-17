@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, ShoppingCart, Box, Truck, Landmark, FileText,
-  RefreshCw, History, Bell, Settings,
+  RefreshCw, Bell, Settings,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -25,54 +25,48 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Invoices", href: "/finance/invoices", icon: FileText, permission: "finance.read" },
   { label: "Notifications", href: "/notifications", icon: Bell, permission: null },
   { label: "Sync Center", href: "/sync", icon: RefreshCw, permission: "system.sync.view" },
-  { label: "Audit Logs", href: "/audit", icon: History, permission: "system.audit.view" },
 ];
 
-// Dark sidebar matching the reference design - a flat item list (no
-// section labels) with a solid green pill for the active item, rather
-// than the earlier restrained-enterprise version's subtle left-border
-// indicator. See docs/design/design-system.md for the full rationale
-// behind this redesign.
 export function Sidebar({ permissions }: { permissions: string[] }) {
   const pathname = usePathname();
   const hasPermission = (p: string | null) => p === null || permissions.includes(p);
 
   return (
-    <aside className="flex w-[240px] flex-shrink-0 flex-col gap-1 bg-sidebar-bg p-4">
-      <div className="mb-4 flex items-center gap-2 px-2 py-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-control bg-primary text-dense font-bold text-sidebar-active-text shadow-glow-sm">
-          N
-        </div>
-        <span className="text-card-title font-semibold text-white">NEXORA</span>
+    <aside className="sticky top-0 z-30 flex w-full flex-shrink-0 flex-col border-b border-sidebar-surface bg-sidebar-bg lg:h-screen lg:w-[238px] lg:border-b-0 lg:border-r">
+      <div className="flex items-center justify-between px-4 py-4 lg:px-5 lg:py-5">
+        <Link href="/dashboard" className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-control bg-primary text-sm font-bold text-white">N</div>
+          <div>
+            <div className="text-sm font-semibold tracking-wide text-white">NEXORA</div>
+            <div className="hidden text-[10px] uppercase tracking-[0.16em] text-sidebar-text-muted lg:block">Business OS</div>
+          </div>
+        </Link>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-1 lg:flex-col lg:overflow-y-auto lg:px-3 lg:pb-3">
         {NAV_ITEMS.filter((item) => hasPermission(item.permission)).map((item) => {
-          const isActive = pathname === item.href;
           const Icon = item.icon;
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(`${item.href}/`));
           return (
             <Link
               key={item.href}
               href={item.href}
               className={clsx(
-                "flex items-center gap-3 rounded-button px-3 py-2.5 text-body transition-all duration-base",
+                "flex min-w-max items-center gap-2.5 rounded-control px-3 py-2.5 text-xs font-medium transition-colors",
                 isActive
-                  ? "bg-sidebar-active font-medium text-sidebar-active-text shadow-glow-sm"
-                  : "text-sidebar-text hover:bg-sidebar-surface"
+                  ? "bg-sidebar-active text-sidebar-active-text"
+                  : "text-sidebar-text hover:bg-sidebar-surface hover:text-white"
               )}
             >
               <Icon size={16} />
-              {item.label}
+              <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="mt-auto flex flex-col gap-1 border-t border-white/10 pt-3">
-        <Link
-          href="/settings"
-          className="flex items-center gap-3 rounded-button px-3 py-2.5 text-body text-sidebar-text hover:bg-sidebar-surface"
-        >
+      <div className="hidden border-t border-white/10 p-3 lg:block">
+        <Link href="/settings" className="flex items-center gap-2.5 rounded-control px-3 py-2.5 text-xs font-medium text-sidebar-text hover:bg-sidebar-surface hover:text-white">
           <Settings size={16} />
           Settings
         </Link>
