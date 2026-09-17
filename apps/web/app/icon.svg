@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="30" fill="#123B2A"/>
+  <path d="M28 82 52 46M76 82 52 46" fill="none" stroke="#B9EACB" stroke-width="8" stroke-linecap="round"/>
+  <path d="M42 82 64 49 86 82" fill="none" stroke="#8EE04E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="64" y="103" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="15" font-weight="800" letter-spacing="-1">NX</text>
+</svg>
