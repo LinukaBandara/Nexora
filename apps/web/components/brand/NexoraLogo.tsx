@@ -9,27 +9,25 @@ type NexoraLogoProps = {
 
 export function NexoraLogo({ compact = false, dark = false, showTagline = false, className = "" }: NexoraLogoProps) {
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
+    <div className={`flex items-center gap-3 ${className}`}>
       <div
         aria-hidden="true"
-        className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-[12px] border ${
-          dark
-            ? "border-[#D7E8DE] bg-[#123B2A] shadow-[0_8px_24px_rgba(18,59,42,0.16)]"
-            : "border-white/20 bg-white/10 shadow-[0_10px_28px_rgba(0,0,0,0.16)] backdrop-blur-xl"
-        } ${compact ? "h-9 w-9 rounded-[10px]" : "h-11 w-11"}`}
+        className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-[10px] ${
+          dark ? "bg-[#123B2A]" : "bg-[#0D2A1D]"
+        } ${compact ? "h-9 w-9 rounded-[9px]" : "h-10 w-10"}`}
       >
-        <span className={`absolute h-[2px] w-6 rotate-[35deg] rounded-full ${dark ? "bg-[#8EE04E]" : "bg-[#8EE04E]"}`} />
-        <span className={`absolute h-[2px] w-6 -rotate-[35deg] rounded-full ${dark ? "bg-[#B9EACB]" : "bg-[#B9EACB]"}`} />
-        <span className={`relative z-10 text-[11px] font-black tracking-[-0.08em] ${dark ? "text-white" : "text-white"}`}>NX</span>
+        <span className="absolute left-[11px] top-[9px] h-[22px] w-[3px] rounded-full bg-[#8EE04E]" />
+        <span className="absolute left-[18px] top-[9px] h-[22px] w-[3px] -rotate-[32deg] rounded-full bg-[#B9EACB]" />
+        <span className="absolute left-[25px] top-[9px] h-[22px] w-[3px] rounded-full bg-[#8EE04E]" />
       </div>
       {!compact && (
         <div className="min-w-0">
-          <div className={`flex items-center gap-1.5 text-[16px] font-extrabold tracking-[-0.03em] ${dark ? "text-[#123B2A]" : "text-white"}`}>
+          <div className={`flex items-baseline gap-2 text-[17px] font-extrabold tracking-[-0.045em] ${dark ? "text-[#123B2A]" : "text-white"}`}>
             NEXORA
-            <span className="rounded-full bg-[#8EE04E] px-1.5 py-0.5 text-[8px] font-black tracking-[0.08em] text-[#0F2A1E]">ERP</span>
+            <span className={`text-[8px] font-bold tracking-[0.16em] ${dark ? "text-[#5D7468]" : "text-[#9CC9AE]"}`}>ERP</span>
           </div>
           {showTagline && (
-            <div className={`mt-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] ${dark ? "text-[#6D8175]" : "text-[#A8C8B6]"}`}>
+            <div className={`mt-0.5 text-[8px] font-semibold uppercase tracking-[0.2em] ${dark ? "text-[#71847A]" : "text-[#9CC0AD]"}`}>
               Business operating system
             </div>
           )}
