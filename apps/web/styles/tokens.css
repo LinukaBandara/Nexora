@@ -1,73 +1,52 @@
-/**
- * NEXORA ERP — Design Tokens
- *
- * Redesigned to match the AeuxGlobal-style reference: dark sidebar +
- * floating light content panel on a green gradient page background,
- * dark stat cards with sparkline accents, pill-shaped badges/buttons,
- * larger radii than the original spec's restrained-enterprise system.
- * Every component reads these tokens - changing a value here changes
- * it everywhere, since no component hardcodes a color/radius directly.
- */
-
 :root {
-  /* ---- Color: Primary (green, replacing the old blue) -------------------- */
-  --color-primary: #22C55E;
-  --color-primary-hover: #16A34A;
-  --color-primary-soft: #DCFCE7;
+  --color-primary: #1F7A4D;
+  --color-primary-hover: #17603B;
+  --color-primary-soft: #E6F3EB;
 
-  /* ---- Color: Page background (the gradient behind the floating panel) --- */
-  --color-page-gradient-start: #15391F;
-  --color-page-gradient-end: #22C55E;
+  --color-page-gradient-start: #FFFFFF;
+  --color-page-gradient-end: #FFFFFF;
 
-  /* ---- Color: Sidebar (dark, independent of the light content palette) --- */
-  --color-sidebar-bg: #0E1512;
-  --color-sidebar-surface: #17201B;
-  --color-sidebar-text: #D1D5DB;
-  --color-sidebar-text-muted: #6B7280;
-  --color-sidebar-active-bg: #22C55E;
-  --color-sidebar-active-text: #0E1512;
+  --color-sidebar-bg: #123B2A;
+  --color-sidebar-surface: #1A4B36;
+  --color-sidebar-text: #D9E9DF;
+  --color-sidebar-text-muted: #91B4A0;
+  --color-sidebar-active-bg: #FFFFFF;
+  --color-sidebar-active-text: #123B2A;
 
-  /* ---- Color: Neutral (the light content panel) --------------------------- */
-  --color-background: #F3F5F3;
+  --color-background: #F7F9F7;
   --color-surface: #FFFFFF;
-  --color-surface-secondary: #F7F8F7;
-  --color-border: #E5E7EB;
-  --color-border-strong: #D1D5DB;
-  --color-text-primary: #111827;
-  --color-text-secondary: #4B5563;
-  --color-text-muted: #6B7280;
+  --color-surface-secondary: #F2F5F3;
+  --color-border: #E3E9E5;
+  --color-border-strong: #CCD8D0;
+  --color-text-primary: #142019;
+  --color-text-secondary: #52625A;
+  --color-text-muted: #7A8881;
 
-  /* ---- Color: Dark cards (the Air Pollution-style stat cards) ------------- */
-  --color-dark-card-bg: #111813;
-  --color-dark-card-text: #F9FAFB;
-  --color-dark-card-text-muted: #9CA3AF;
+  --color-dark-card-bg: #123B2A;
+  --color-dark-card-text: #FFFFFF;
+  --color-dark-card-text-muted: #B8D0C1;
 
-  /* ---- Color: Semantic ------------------------------------------------------ */
-  --color-success: #16A34A;
-  --color-success-bg: #DCFCE7;
-  --color-warning: #D97706;
-  --color-warning-bg: #FEF3C7;
-  --color-danger: #DC2626;
-  --color-danger-bg: #FEE2E2;
-  --color-info: #22C55E;
-  --color-info-bg: #DCFCE7;
+  --color-success: #1F7A4D;
+  --color-success-bg: #E6F3EB;
+  --color-warning: #B7791F;
+  --color-warning-bg: #FFF4D8;
+  --color-danger: #C84A4A;
+  --color-danger-bg: #FBE8E8;
+  --color-info: #2F6F5A;
+  --color-info-bg: #E8F1ED;
 
-  /* ---- Typography -------------------------------------------------------------- */
-  --font-family-primary: "Geist", "Inter", -apple-system, sans-serif;
-
+  --font-family-primary: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-size-display: 36px;
-  --font-size-page-title: 27px;
-  --font-size-section-title: 19px;
-  --font-size-card-title: 15px;
+  --font-size-page-title: 28px;
+  --font-size-section-title: 18px;
+  --font-size-card-title: 14px;
   --font-size-body: 14px;
   --font-size-secondary: 13px;
   --font-size-dense: 12px;
-
   --font-weight-heading: 650;
   --font-weight-label: 550;
   --font-weight-body: 400;
 
-  /* ---- Spacing (unchanged 4px base scale) --------------------------------------- */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -79,45 +58,38 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ---- Radius (bumped up to match the reference's rounder, softer look) -------- */
   --radius-control: 10px;
-  --radius-input: 12px;
-  --radius-button: 999px;
-  --radius-card: 20px;
-  --radius-dialog: 24px;
-  --radius-container: 32px;
+  --radius-input: 11px;
+  --radius-button: 10px;
+  --radius-card: 16px;
+  --radius-dialog: 20px;
+  --radius-container: 0px;
 
-  /* ---- Shadow ------------------------------------------------------------------- */
-  --shadow-card: 0 1px 3px rgba(17, 24, 39, 0.05);
-  --shadow-dropdown: 0 8px 20px rgba(17, 24, 39, 0.10);
-  --shadow-dialog: 0 20px 48px rgba(17, 24, 39, 0.18);
-  --shadow-panel: 0 24px 64px rgba(0, 0, 0, 0.25);
+  --shadow-card: 0 1px 2px rgba(20, 32, 25, 0.04), 0 5px 18px rgba(20, 32, 25, 0.035);
+  --shadow-dropdown: 0 12px 28px rgba(20, 32, 25, 0.12);
+  --shadow-dialog: 0 24px 60px rgba(20, 32, 25, 0.18);
+  --shadow-panel: none;
 
-  /* ---- Motion --------------------------------------------------------------------- */
   --transition-fast: 150ms ease;
   --transition-base: 200ms ease;
 
-  /* ---- Layout ----------------------------------------------------------------------- */
-  --sidebar-width-expanded: 240px;
+  --sidebar-width-expanded: 238px;
   --sidebar-width-collapsed: 64px;
-  --topbar-height: 64px;
+  --topbar-height: 68px;
 }
 
-/* Dark mode is not yet redesigned for this new palette - the light-panel
-   look is the only theme implemented right now. Revisit if/when dark
-   mode is prioritized again. */
 [data-theme="dark"] {
-  --color-background: #0B0F14;
-  --color-surface: #111827;
-  --color-surface-secondary: #151B24;
-  --color-border: #1F2937;
-  --color-border-strong: #2A3644;
-  --color-text-primary: #F9FAFB;
-  --color-text-secondary: #9CA3AF;
-  --color-text-muted: #6B7280;
+  --color-background: #101713;
+  --color-surface: #16211B;
+  --color-surface-secondary: #1B2821;
+  --color-border: #29382F;
+  --color-border-strong: #3A4D42;
+  --color-text-primary: #F4F8F5;
+  --color-text-secondary: #B4C4BA;
+  --color-text-muted: #84978C;
 }
 
 .status-success { color: var(--color-success); background: var(--color-success-bg); }
 .status-warning { color: var(--color-warning); background: var(--color-warning-bg); }
-.status-danger  { color: var(--color-danger);  background: var(--color-danger-bg); }
-.status-info    { color: var(--color-info);    background: var(--color-info-bg); }
+.status-danger  { color: var(--color-danger); background: var(--color-danger-bg); }
+.status-info    { color: var(--color-info); background: var(--color-info-bg); }
