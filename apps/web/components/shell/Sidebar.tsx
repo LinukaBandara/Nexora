@@ -14,9 +14,9 @@ import {
   X,
   FileText,
   Building2,
-  Sparkles,
 } from "lucide-react";
 import clsx from "clsx";
+import { NexoraLogo } from "@/components/brand/NexoraLogo";
 
 interface NavItemConfig {
   label: string;
@@ -56,17 +56,10 @@ interface SidebarProps {
 export function Sidebar({ permissions, open = false, onClose, userEmail }: SidebarProps) {
   const pathname = usePathname();
   const perms = new Set(permissions.map((p) => p.toLowerCase()));
-
-  const filteredItems = NAV_CONFIG.filter(
-    (item) =>
-      item.permissionKey === null ||
-      (PERMISSION_ALIASES[item.permissionKey] ?? []).some((p) => perms.has(p))
-  );
-
+  const filteredItems = NAV_CONFIG.filter((item) => item.permissionKey === null || (PERMISSION_ALIASES[item.permissionKey] ?? []).some((p) => perms.has(p)));
   const menuItems = filteredItems.filter((i) => i.group === "menu");
   const operationItems = filteredItems.filter((i) => i.group === "operations");
   const systemItems = filteredItems.filter((i) => i.group === "system");
-
   const displayName = userEmail ? userEmail.split("@")[0] : "Admin";
   const initials = displayName.slice(0, 2).toUpperCase();
 
@@ -74,45 +67,17 @@ export function Sidebar({ permissions, open = false, onClose, userEmail }: Sideb
     if (items.length === 0) return null;
     return (
       <div className="space-y-1">
-        <div className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#78A88F]">
-          {title}
-        </div>
+        <div className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#78A88F]">{title}</div>
         {items.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/dashboard" && pathname?.startsWith(`${item.href}/`));
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(`${item.href}/`));
           const Icon = item.icon;
-
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className={clsx(
-                "group relative flex w-full items-center gap-3 rounded-[12px] px-3.5 py-2.5 text-[13px] font-medium transition-colors",
-                isActive
-                  ? "bg-white text-[#123B2A] font-semibold shadow-sm"
-                  : "text-[#D3E5DB] hover:bg-white/[0.08] hover:text-white"
-              )}
-            >
-              {/* Active Lime Indicator Tab */}
-              {isActive && (
-                <span className="absolute -left-1 top-2 bottom-2 w-1.5 rounded-full bg-[#8EE04E]" />
-              )}
-              <Icon
-                size={18}
-                strokeWidth={isActive ? 2.4 : 2}
-                className={isActive ? "text-[#123B2A]" : "text-[#97BCAB] group-hover:text-white"}
-              />
+            <Link key={item.href} href={item.href} onClick={onClose} className={clsx("group relative flex w-full items-center gap-3 rounded-[12px] px-3.5 py-2.5 text-[13px] font-medium transition-colors", isActive ? "bg-white text-[#123B2A] font-semibold shadow-sm" : "text-[#D3E5DB] hover:bg-white/[0.08] hover:text-white")}>
+              {isActive && <span className="absolute -left-1 top-2 bottom-2 w-1.5 rounded-full bg-[#8EE04E]" />}
+              <Icon size={18} strokeWidth={isActive ? 2.4 : 2} className={isActive ? "text-[#123B2A]" : "text-[#97BCAB] group-hover:text-white"} />
               <span className="flex-1 truncate">{item.label}</span>
-              {item.badge && !isActive && (
-                <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#8EE04E] px-1.5 text-[10px] font-bold text-[#0F2A1E]">
-                  {item.badge}
-                </span>
-              )}
-              {isActive && (
-                <ChevronRight size={14} className="text-[#123B2A]/70" />
-              )}
+              {item.badge && !isActive && <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#8EE04E] px-1.5 text-[10px] font-bold text-[#0F2A1E]">{item.badge}</span>}
+              {isActive && <ChevronRight size={14} className="text-[#123B2A]/70" />}
             </Link>
           );
         })}
@@ -122,104 +87,35 @@ export function Sidebar({ permissions, open = false, onClose, userEmail }: Sideb
 
   const sidebarContent = (
     <aside className="flex h-full w-[260px] flex-col bg-[#123B2A] text-white select-none">
-      {/* Brand Header */}
-      <div className="flex items-center justify-between px-6 pt-6 pb-4">
-        <Link href="/dashboard" onClick={onClose} className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white font-black text-[#123B2A] shadow-sm">
-            <Sparkles size={20} className="text-[#123B2A]" />
-          </div>
-          <div>
-            <div className="text-[16px] font-bold tracking-tight text-white flex items-center gap-1.5">
-              NEXORA
-              <span className="text-[10px] font-semibold text-[#8EE04E] bg-[#8EE04E]/15 px-1.5 py-0.5 rounded-full">ERP</span>
-            </div>
-            <div className="text-[10px] uppercase tracking-[0.16em] text-[#86AE98]">
-              Enterprise OS
-            </div>
-          </div>
+      <div className="flex items-center justify-between px-6 pb-4 pt-6">
+        <Link href="/dashboard" onClick={onClose} aria-label="NEXORA dashboard" className="transition-opacity hover:opacity-90">
+          <NexoraLogo showTagline />
         </Link>
-        <button
-          onClick={onClose}
-          className="rounded-lg p-1.5 text-[#91B5A1] hover:bg-white/10 lg:hidden"
-          aria-label="Close navigation"
-        >
-          <X size={18} />
-        </button>
+        <button onClick={onClose} className="rounded-lg p-1.5 text-[#91B5A1] hover:bg-white/10 lg:hidden" aria-label="Close navigation"><X size={18} /></button>
       </div>
 
-      {/* Workspace Selector Badge */}
       <div className="px-5 py-2">
         <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.06] px-3.5 py-2.5 text-xs text-[#D5E6DC]">
-          <div className="flex items-center gap-2.5">
-            <Building2 size={15} className="text-[#8EE04E]" />
-            <div>
-              <div className="text-[9px] font-bold uppercase tracking-wider text-[#7EAC95]">
-                Workspace
-              </div>
-              <div className="font-semibold text-white">Main Organization</div>
-            </div>
-          </div>
+          <div className="flex items-center gap-2.5"><Building2 size={15} className="text-[#8EE04E]" /><div><div className="text-[9px] font-bold uppercase tracking-wider text-[#7EAC95]">Workspace</div><div className="font-semibold text-white">Main Organization</div></div></div>
           <ChevronRight size={13} className="text-[#7EAC95]" />
         </div>
       </div>
 
-      {/* Nav Lists */}
-      <nav className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
-        {renderNavGroup("Menu", menuItems)}
-        {renderNavGroup("Operations", operationItems)}
-        {renderNavGroup("General", systemItems)}
-      </nav>
+      <nav className="flex-1 space-y-3 overflow-y-auto px-4 py-3">{renderNavGroup("Menu", menuItems)}{renderNavGroup("Operations", operationItems)}{renderNavGroup("General", systemItems)}</nav>
 
-      {/* User Profile Card */}
       <div className="border-t border-white/10 p-4">
         <div className="flex items-center gap-3 rounded-xl bg-white/[0.06] p-2.5">
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[#E5F5EC] text-xs font-bold text-[#123B2A]">
-            {initials}
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#8EE04E] ring-2 ring-[#123B2A]" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-xs font-semibold text-white capitalize">{displayName}</div>
-            <div className="truncate text-[10px] text-[#8CB49E]">
-              {userEmail || "Executive Access"}
-            </div>
-          </div>
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[#E5F5EC] text-xs font-bold text-[#123B2A]">{initials}<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#8EE04E] ring-2 ring-[#123B2A]" /></div>
+          <div className="min-w-0 flex-1"><div className="truncate text-xs font-semibold text-white capitalize">{displayName}</div><div className="truncate text-[10px] text-[#8CB49E]">{userEmail || "Executive Access"}</div></div>
         </div>
+        <div className="mt-3 text-center text-[8px] font-medium uppercase tracking-[0.18em] text-[#6F9A85]">Powered by NEXORA · ARK II</div>
       </div>
     </aside>
   );
 
-  return (
-    <>
-      {/* Desktop Sticky Sidebar */}
-      <div className="hidden lg:sticky lg:top-0 lg:z-40 lg:block lg:h-screen">
-        {sidebarContent}
-      </div>
-
-      {/* Mobile Overlay Sidebar */}
-      {open && (
-        <div className="fixed inset-0 z-[80] flex lg:hidden">
-          <button
-            aria-label="Close navigation"
-            onClick={onClose}
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-          />
-          <div className="relative z-10 animate-content-in shadow-2xl">
-            {sidebarContent}
-          </div>
-        </div>
-      )}
-    </>
-  );
+  return <><div className="hidden lg:sticky lg:top-0 lg:z-40 lg:block lg:h-screen">{sidebarContent}</div>{open && <div className="fixed inset-0 z-[80] flex lg:hidden"><button aria-label="Close navigation" onClick={onClose} className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" /><div className="relative z-10 animate-content-in shadow-2xl">{sidebarContent}</div></div>}</>;
 }
 
 export function MobileMenuButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label="Open navigation"
-      className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#DCE4DE] bg-white text-[#123B2A] shadow-sm hover:bg-[#F3F6F4] lg:hidden"
-    >
-      <span className="text-base font-semibold">☰</span>
-    </button>
-  );
+  return <button onClick={onClick} aria-label="Open navigation" className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#DCE4DE] bg-white text-[#123B2A] shadow-sm hover:bg-[#F3F6F4] lg:hidden"><span className="text-base font-semibold">☰</span></button>;
 }
