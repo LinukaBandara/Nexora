@@ -27,7 +27,6 @@ export default function LoginPage() {
 
   return (
     <main className="relative min-h-[100svh] overflow-hidden bg-[#071C14]" style={{ fontFamily: "var(--font-family-primary)" }}>
-      {/* Full-viewport NEXORA motion layer */}
       <div className="pointer-events-none fixed inset-0 z-0 h-[100svh] w-screen overflow-hidden">
         <AcidSquares color1="#071C14" color2="#185F3D" color3="#B9EACB" speed={0.16} density={8.5} glow={0.32} brightness={0.5} opacity={0.2} mouseInteraction />
         <div className="absolute inset-0 bg-[#071C14]/45" />
@@ -62,7 +61,9 @@ export default function LoginPage() {
           </section>
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[10px] font-medium uppercase tracking-[0.12em] text-white/55">{MODULES.map((module) => <span key={module}>{module}</span>)}</div>
-          <div className="mt-4 text-center text-[9px] font-medium uppercase tracking-[0.18em] text-white/35">Designed &amp; Developed by ARK II</div>
+          <div className="mt-4 text-center text-[9px] font-medium uppercase tracking-[0.18em] text-white/35">
+            Designed &amp; Developed by <a href="https://ark-ii.studio" target="_blank" rel="noreferrer" className="text-white/60 underline-offset-4 transition hover:text-white hover:underline">ARK II</a>
+          </div>
         </div>
       </div>
     </main>
