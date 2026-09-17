@@ -4,15 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/nexora-api";
 import { ApiError } from "@/lib/api";
-import { Button } from "@/components/ui/Button";
-import { ArrowRight, CheckCircle2, Lock, ShieldCheck, Sparkles, Eye, EyeOff } from "lucide-react";
-
-const FEATURES = [
-  "Real-time inventory levels and low-stock intelligence",
-  "Permission-governed sales & purchase order approvals",
-  "Comprehensive financial cash flow & receivables tracking",
-  "Cloud-edge synchronization with conflict resolution",
-];
+import { ArrowUpRight, Eye, EyeOff, LockKeyhole, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,188 +29,164 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full" style={{ fontFamily: "var(--font-family-primary)" }}>
-      {/* ── Left branding panel ── */}
-      <div
-        className="relative hidden w-[46%] flex-col justify-between overflow-hidden p-12 text-white lg:flex xl:p-16"
-        style={{ background: "linear-gradient(150deg, #0E2E1E 0%, #123B2A 50%, #16492F 100%)" }}
-      >
-        {/* Decorative rings */}
-        <div className="pointer-events-none absolute -right-24 -top-24 h-[500px] w-[500px] rounded-full border border-white/[0.06]" />
-        <div className="pointer-events-none absolute -right-16 -top-16 h-[360px] w-[360px] rounded-full border border-white/[0.04]" />
-        <div className="pointer-events-none absolute -left-32 bottom-0 h-[400px] w-[400px] rounded-full border border-white/[0.05]" />
-        {/* Lime glow accent */}
-        <div
-          className="pointer-events-none absolute right-0 top-1/3 h-64 w-64 rounded-full opacity-10 blur-3xl"
-          style={{ background: "#8EE04E" }}
-        />
+    <main className="min-h-screen bg-[#F3F5F2] text-[#142019]" style={{ fontFamily: "var(--font-family-primary)" }}>
+      <div className="grid min-h-screen lg:grid-cols-[1.1fr_0.9fr]">
+        {/* Brand side */}
+        <section className="relative hidden overflow-hidden bg-white lg:flex lg:flex-col lg:justify-between lg:p-14 xl:p-20">
+          <div className="pointer-events-none absolute right-[-140px] top-[-160px] h-[520px] w-[520px] rounded-full border border-[#123B2A]/[0.06]" />
+          <div className="pointer-events-none absolute right-[-40px] top-[-60px] h-[330px] w-[330px] rounded-full border border-[#123B2A]/[0.05]" />
+          <div className="pointer-events-none absolute bottom-[-220px] left-[-120px] h-[500px] w-[500px] rounded-full bg-[#EAF1EC]" />
 
-        {/* Brand logo */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white shadow-md">
-            <Sparkles size={22} className="text-[#123B2A]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 text-xl font-bold tracking-tight text-white">
-              NEXORA
-              <span className="rounded-full bg-[#8EE04E]/20 px-2 py-0.5 text-[10px] font-semibold text-[#8EE04E]">
-                ENTERPRISE
-              </span>
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#123B2A] text-white">
+              <Sparkles size={18} />
             </div>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-[#8CB79F]">Business Operating System</div>
-          </div>
-        </div>
-
-        {/* Value statement */}
-        <div className="relative z-10 max-w-md space-y-8">
-          <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#8EE04E]/20 bg-[#8EE04E]/10 px-3 py-1 text-xs font-semibold text-[#8EE04E]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#8EE04E]" />
-              Unified ERP Platform
-            </div>
-            <h2 className="text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-[40px]">
-              One Business.<br />One System.<br />
-              <span className="text-[#8EE04E]">Total Control.</span>
-            </h2>
+            <span className="text-[19px] font-bold tracking-[-0.03em]">NEXORA</span>
           </div>
 
-          <div className="space-y-2.5">
-            {FEATURES.map((f, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-xs text-[#D0E6DA] backdrop-blur-sm"
-              >
-                <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-[#8EE04E]" />
-                <span>{f}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="relative z-10 flex items-center justify-between border-t border-white/10 pt-6 text-[12px] text-[#8CB79F]">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={15} className="text-[#8EE04E]" />
-            <span>Role-Based Access Control Active</span>
-          </div>
-          <span>v1.0 Commercial</span>
-        </div>
-      </div>
-
-      {/* ── Right login panel ── */}
-      <div className="flex flex-1 flex-col items-center justify-center bg-[#F6F9F6] px-6 py-12 sm:px-12 lg:px-14">
-        <div className="w-full max-w-[420px] space-y-8">
-
-          {/* Mobile logo */}
-          <div className="flex flex-col items-center text-center lg:hidden">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#123B2A] shadow-md">
-              <Sparkles size={22} className="text-[#8EE04E]" />
-            </div>
-            <h1 className="mt-3 text-xl font-bold tracking-tight text-[#142019]">NEXORA ERP</h1>
-            <p className="mt-1 text-xs text-[#63756A]">One Business. One System. Total Control.</p>
-          </div>
-
-          {/* Heading */}
-          <div>
-            <h2 className="text-[26px] font-bold tracking-tight text-[#142019]">Sign in</h2>
-            <p className="mt-1.5 text-sm text-[#66776E]">
-              Enter your credentials to access your workspace.
+          <div className="relative z-10 max-w-[620px] pb-6">
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#6A7B70]">
+              Workspace access
             </p>
-          </div>
+            <h1 className="max-w-[590px] text-[clamp(46px,5.2vw,78px)] font-semibold leading-[0.96] tracking-[-0.065em] text-[#142019]">
+              Everything your business needs, in one place.
+            </h1>
+            <p className="mt-7 max-w-[500px] text-[15px] leading-7 text-[#66776E]">
+              Manage sales, inventory, purchasing and finance from a single workspace built around your day-to-day operations.
+            </p>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="login-email"
-                className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[#4E6155]"
-              >
-                Email Address
-              </label>
-              <input
-                id="login-email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@company.com"
-                className="h-11 w-full rounded-xl border border-[#D7DFDA] bg-white px-4 text-sm text-[#142019] placeholder:text-[#91A297] transition-all focus:border-[#1F7A4D] focus:outline-none focus:ring-2 focus:ring-[#1F7A4D]/15"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <div className="mb-1.5 flex items-center justify-between">
-                <label
-                  htmlFor="login-password"
-                  className="block text-[11px] font-semibold uppercase tracking-wider text-[#4E6155]"
+            <div className="mt-10 flex flex-wrap gap-2">
+              {[
+                "Sales",
+                "Inventory",
+                "Purchasing",
+                "Finance",
+              ].map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-[#DCE4DE] bg-[#F8FAF8] px-3.5 py-2 text-xs font-medium text-[#4E6155]"
                 >
-                  Password
-                </label>
-                <span className="cursor-not-allowed text-xs text-[#7A8E82]">Forgot password?</span>
-              </div>
-              <div className="relative">
-                <input
-                  id="login-password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="h-11 w-full rounded-xl border border-[#D7DFDA] bg-white px-4 pr-10 text-sm text-[#142019] placeholder:text-[#91A297] transition-all focus:border-[#1F7A4D] focus:outline-none focus:ring-2 focus:ring-[#1F7A4D]/15"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#889B8E] hover:text-[#4E6155] transition"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="rounded-xl border border-[#F5C2C2] bg-[#FDF5F5] px-4 py-3 text-xs font-medium text-[#C84A4A]">
-                {error}
-              </div>
-            )}
-
-            {/* Submit */}
-            <button
-              id="login-submit"
-              type="submit"
-              disabled={loading}
-              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#123B2A] text-sm font-semibold text-white shadow-sm transition hover:bg-[#184E37] active:scale-[0.98] disabled:opacity-60"
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Signing in...
+                  {item}
                 </span>
-              ) : (
-                <>Access Workspace <ArrowRight size={15} /></>
-              )}
-            </button>
-          </form>
-
-          {/* Demo notice */}
-          <div className="rounded-xl border border-[#E1E8E3] bg-white px-4 py-3.5 text-xs text-[#5D6F63] shadow-sm">
-            <div className="flex items-center gap-1.5 font-semibold text-[#142019]">
-              <span className="h-2 w-2 rounded-full bg-[#8EE04E]" />
-              Offline & Demo Mode Ready
-            </div>
-            <div className="mt-1 text-[11px] text-[#718377] leading-relaxed">
-              When the backend is unreachable, NEXORA automatically activates the offline demo environment with sample data.
+              ))}
             </div>
           </div>
-        </div>
+
+          <div className="relative z-10 flex items-center justify-between border-t border-[#E7ECE8] pt-5 text-[11px] text-[#7B8A81]">
+            <span>Secure workspace</span>
+            <span>© {new Date().getFullYear()} NEXORA</span>
+          </div>
+        </section>
+
+        {/* Login side */}
+        <section className="flex min-h-screen items-center justify-center bg-[#123B2A] px-5 py-10 sm:px-8 lg:px-12">
+          <div className="w-full max-w-[430px]">
+            <div className="mb-7 flex items-center gap-3 lg:hidden">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#123B2A]">
+                <Sparkles size={18} />
+              </div>
+              <span className="text-xl font-bold tracking-[-0.03em] text-white">NEXORA</span>
+            </div>
+
+            <div className="rounded-[26px] bg-white p-7 shadow-[0_30px_80px_rgba(0,0,0,0.18)] sm:p-9">
+              <div className="mb-8">
+                <div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#EDF4EF] text-[#123B2A]">
+                  <LockKeyhole size={16} />
+                </div>
+                <h2 className="text-[28px] font-semibold tracking-[-0.04em] text-[#142019]">Welcome back</h2>
+                <p className="mt-1.5 text-sm leading-6 text-[#718077]">Sign in to continue to your workspace.</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="login-email" className="mb-1.5 block text-xs font-medium text-[#4E6155]">
+                    Email
+                  </label>
+                  <input
+                    id="login-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="h-12 w-full rounded-xl border border-[#D8E0DA] bg-[#FAFCFA] px-4 text-sm text-[#142019] outline-none transition placeholder:text-[#9AA79F] focus:border-[#1F7A4D] focus:bg-white focus:ring-4 focus:ring-[#1F7A4D]/10"
+                  />
+                </div>
+
+                <div>
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <label htmlFor="login-password" className="text-xs font-medium text-[#4E6155]">
+                      Password
+                    </label>
+                    <span className="text-[11px] text-[#98A49D]">Contact your administrator</span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="h-12 w-full rounded-xl border border-[#D8E0DA] bg-[#FAFCFA] px-4 pr-11 text-sm text-[#142019] outline-none transition placeholder:text-[#9AA79F] focus:border-[#1F7A4D] focus:bg-white focus:ring-4 focus:ring-[#1F7A4D]/10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-[#84928A] transition hover:bg-[#EDF4EF] hover:text-[#123B2A]"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="rounded-xl border border-[#F1CACA] bg-[#FFF7F7] px-4 py-3 text-xs font-medium text-[#C84A4A]">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  id="login-submit"
+                  type="submit"
+                  disabled={loading}
+                  className="group mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#123B2A] text-sm font-semibold text-white transition hover:bg-[#184E37] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Signing in...
+                    </span>
+                  ) : (
+                    <>
+                      Continue to NEXORA
+                      <ArrowUpRight size={16} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-7 border-t border-[#E7ECE8] pt-5">
+                <div className="flex items-start gap-2.5">
+                  <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#72B83D]" />
+                  <div>
+                    <p className="text-xs font-semibold text-[#35473D]">Demo environment available</p>
+                    <p className="mt-1 text-[11px] leading-5 text-[#7B8981]">
+                      If the backend is unavailable, NEXORA can open its offline demo workspace with sample ERP data.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-5 text-center text-[11px] text-white/50 lg:hidden">Secure workspace</p>
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
