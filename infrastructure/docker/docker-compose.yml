@@ -1,0 +1,119 @@
+name: nexora
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nexora}
+      POSTGRES_USER: ${POSTGRES_USER:-nexora}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      - "5432:5432"
+    volumes:
+      - nexora_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nexora}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-nexora}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD in .env}
+    ports:
+      - "5672:5672"
+      - "15672:15672" # management UI
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ../../backend
+      dockerfile: Nexora.Api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-nexora};Username=${POSTGRES_USER:-nexora};Password=${POSTGRES_PASSWORD}"
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:?set JWT_SIGNING_KEY in .env}
+      Jwt__Issuer: nexora
+      Jwt__Audience: nexora-clients
+      Cors__AllowedOrigins__0: ${WEB_ORIGIN:-http://localhost:3000}
+    ports:
+      - "8080:8080"
+
+  # A second, genuinely separate database - this is what makes the local
+  # node's sync worker actually talk to a different database than the
+  # cloud API, not just a different process against the same one. See
+  # docs/sync.md.
+  node_postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${NODE_POSTGRES_DB:-nexora_node}
+      POSTGRES_USER: ${NODE_POSTGRES_USER:-nexora}
+      POSTGRES_PASSWORD: ${NODE_POSTGRES_PASSWORD:?set NODE_POSTGRES_PASSWORD in .env}
+    ports:
+      - "5433:5432"
+    volumes:
+      - nexora_node_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${NODE_POSTGRES_USER:-nexora}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  local-node:
+    build:
+      context: ../../backend
+      dockerfile: Nexora.LocalNode.Api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      node_postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ConnectionStrings__Default: "Host=node_postgres;Port=5432;Database=${NODE_POSTGRES_DB:-nexora_node};Username=${NODE_POSTGRES_USER:-nexora};Password=${NODE_POSTGRES_PASSWORD}"
+      Jwt__SigningKey: ${NODE_JWT_SIGNING_KEY:?set NODE_JWT_SIGNING_KEY in .env}
+      Jwt__Issuer: nexora
+      Jwt__Audience: nexora-clients
+      # Sync:NodeId / Sync:NodeSecret come from calling POST /api/v1/sync/nodes
+      # against the cloud API first - see docs/sync.md "running two real
+      # databases locally" for the exact steps. Left blank here on purpose;
+      # a node with no credentials simply logs a warning and keeps retrying.
+      Sync__Enabled: "true"
+      Sync__CloudEndpointUrl: "http://api:8080"
+      Sync__NodeId: ${NODE_ID:-}
+      Sync__NodeSecret: ${NODE_SECRET:-}
+    ports:
+      - "8081:8081"
+
+volumes:
+  nexora_postgres_data:
+  nexora_node_postgres_data:

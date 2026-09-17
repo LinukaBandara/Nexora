@@ -1,0 +1,32 @@
+# Dependencies
+**/bin/
+**/obj/
+node_modules/
+.next/
+out/
+dist/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local databases / generated files
+*.db
+*.sqlite
+*.sqlite3
+
+# Vercel
+.vercel/

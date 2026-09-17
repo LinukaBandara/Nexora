@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Nexora.LocalNode.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Deliberately no direct Application/Infrastructure/Domain package
+         references here beyond what Nexora.Api already brings in -
+         the whole point is this host reuses that stack rather than
+         redeclaring it. See docs/sync.md and HostConfiguration.cs. -->
+    <ProjectReference Include="..\Nexora.Api\Nexora.Api.csproj" />
+  </ItemGroup>
+
+</Project>
