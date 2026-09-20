@@ -330,12 +330,9 @@ export default function PurchasingPage() {
                               <span>{isApprovingId === po.id ? "Approving..." : "Approve PO"}</span>
                             </Button>
                           ) : po.status === "Approved" || po.status === "Received" ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1F7A4D]">
-                              <CheckCircle2 size={13} />
-                              <span>Approved</span>
-                            </span>
-                          ) : (
-                            <button onClick={() => openOrder(order)} className="inline-flex items-center gap-1 rounded-lg border border-[#D9E2DC] px-2.5 py-1.5 text-[11px] font-semibold text-[#234334] hover:bg-[#F4F7F5]">Open</button>
+                            <div className="inline-flex items-center gap-2">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1F7A4D]"><CheckCircle2 size={13} /><span>{po.status === "Received" ? "Received" : "Approved"}</span></span>
+                              <button onClick={() => openOrder(po)} className="inline-flex items-center gap-1 rounded-lg border border-[#D9E2DC] px-2.5 py-1.5 text-[11px] font-semibold text-[#234334] hover:bg-[#F4F7F5]">Open</button>
                           )}
                         </td>
                       </tr>
