@@ -138,11 +138,11 @@ export function demoResponse(path: string[], search: string, method: string, bod
   };
   state.salesOrders = state.salesOrders.map((order: any) => ({
     ...order,
-    items: order.items ?? [],
+    items: order.items ?? salesOrders.find((seed) => seed.id === order.id)?.items ?? [],
   }));
   state.purchaseOrders = state.purchaseOrders.map((order: any) => ({
     ...order,
-    items: order.items ?? [],
+    items: order.items ?? purchaseOrders.find((seed) => seed.id === order.id)?.items ?? [],
   }));
   const save = () => writeDemoState(state);
 
