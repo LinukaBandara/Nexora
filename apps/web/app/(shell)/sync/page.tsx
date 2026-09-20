@@ -108,7 +108,7 @@ export default function SyncPage() {
           value={data.syncedToday.toLocaleString()}
           variant="dark"
           tag="Stream Active"
-          changeLabel="100% throughput"
+          changeLabel="Sync activity"
           changeDirection="up"
         />
         <KpiCard
@@ -122,7 +122,7 @@ export default function SyncPage() {
           label="Open Conflicts"
           value={data.openConflicts.toLocaleString()}
           detail={data.openConflicts > 0 ? "Manual resolution advised" : "Deterministic sync"}
-          changeLabel={data.openConflicts > 0 ? "1 conflict flagged" : "Clean state"}
+          changeLabel={data.openConflicts > 0 ? "Conflict flagged" : "Clean state"}
           changeDirection={data.openConflicts > 0 ? "down" : "up"}
         />
       </section>
@@ -137,7 +137,7 @@ export default function SyncPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-[#142019]">Pipeline Health Status</h2>
-                <StatusBadge label="Operational" tone="success" />
+                <StatusBadge label="Sync monitor" tone="neutral" />
               </div>
               <p className="mt-0.5 text-[12px] text-[#697B70]">
                 Continuous event-driven replication across local edge and central cloud.
@@ -166,26 +166,26 @@ export default function SyncPage() {
           <div className="rounded-xl border border-[#E3E9E5] bg-[#FAFCFA] p-3.5">
             <div className="flex items-center gap-2 text-xs font-semibold text-[#54675C]">
               <Database size={15} className="text-[#1F7A4D]" />
-              <span>Event Log Strategy</span>
+              <span>Event Queue</span>
             </div>
-            <div className="mt-1 text-sm font-bold text-[#142019]">Append-Only WAL</div>
-            <div className="mt-0.5 text-[11px] text-[#7A8C81]">Zero loss transactional queue</div>
+            <div className="mt-1 text-sm font-bold text-[#142019]">Durable event queue</div>
+            <div className="mt-0.5 text-[11px] text-[#7A8C81]">Queued changes tracked for replication</div>
           </div>
           <div className="rounded-xl border border-[#E3E9E5] bg-[#FAFCFA] p-3.5">
             <div className="flex items-center gap-2 text-xs font-semibold text-[#54675C]">
               <Server size={15} className="text-[#1F7A4D]" />
-              <span>Edge Consistency</span>
+              <span>Conflict Handling</span>
             </div>
-            <div className="mt-1 text-sm font-bold text-[#142019]">CRDT Deterministic</div>
-            <div className="mt-0.5 text-[11px] text-[#7A8C81]">Auto-resolved concurrent updates</div>
+            <div className="mt-1 text-sm font-bold text-[#142019]">Conflict-aware</div>
+            <div className="mt-0.5 text-[11px] text-[#7A8C81]">Conflicts surfaced for controlled resolution</div>
           </div>
           <div className="rounded-xl border border-[#E3E9E5] bg-[#FAFCFA] p-3.5">
             <div className="flex items-center gap-2 text-xs font-semibold text-[#54675C]">
               <Zap size={15} className="text-[#1F7A4D]" />
-              <span>Network Mode</span>
+              <span>Operating Mode</span>
             </div>
-            <div className="mt-1 text-sm font-bold text-[#142019]">Offline Tolerant</div>
-            <div className="mt-0.5 text-[11px] text-[#7A8C81]">Auto-reconnect on socket restore</div>
+            <div className="mt-1 text-sm font-bold text-[#142019]">Hybrid Ready</div>
+            <div className="mt-0.5 text-[11px] text-[#7A8C81]">Designed for local and cloud operation</div>
           </div>
         </div>
       </div>
