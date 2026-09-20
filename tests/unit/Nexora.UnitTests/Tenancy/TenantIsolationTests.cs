@@ -40,6 +40,34 @@ public class TenantIsolationTests
     }
 
     [Fact]
+    public async Task BranchScopedTenant_CannotSeeAnotherBranchesData()
+    {
+        var tenantContext = new FakeTenantContext();
+        var currentUser = new FakeCurrentUserService();
+        await using var db = TestDbContextFactory.Create(tenantContext, currentUser);
+
+        var org = new Organization { Name = "Org A", Slug = "org-a" };
+        db.Organizations.Add(org);
+
+        var branchA = new Branch { OrganizationId = org.Id, Name = "Branch A" };
+        var branchB = new Branch { OrganizationId = org.Id, Name = "Branch B" };
+        db.Branches.AddRange(branchA, branchB);
+
+        db.Users.AddRange(
+            new User { OrganizationId = org.Id, BranchId = branchA.Id, Email = "a@org.test", FullName = "Branch A User", PasswordHash = "x" },
+            new User { OrganizationId = org.Id, BranchId = branchB.Id, Email = "b@org.test", FullName = "Branch B User", PasswordHash = "x" },
+            new User { OrganizationId = org.Id, Email = "hq@org.test", FullName = "HQ User", PasswordHash = "x" });
+        await db.SaveChangesAsync();
+
+        tenantContext.Set(org.Id, branchA.Id);
+
+        var visibleUsers = db.Users.OrderBy(u => u.Email).ToList();
+
+        visibleUsers.Should().HaveCount(2);
+        visibleUsers.Select(u => u.Email).Should().BeEquivalentTo(new[] { "a@org.test", "hq@org.test" });
+    }
+
+    [Fact]
     public async Task SoftDeletedRecords_AreExcluded_EvenWithinTheSameTenant()
     {
         var tenantContext = new FakeTenantContext();
