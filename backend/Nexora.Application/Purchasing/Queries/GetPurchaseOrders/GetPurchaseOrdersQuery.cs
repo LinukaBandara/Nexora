@@ -35,7 +35,7 @@ public class GetPurchaseOrdersQueryHandler : IRequestHandler<GetPurchaseOrdersQu
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(x => new PurchaseOrderListItemDto(
-                x.order.Id, x.order.Number, x.Name, x.order.Status.ToString(), x.order.OrderDate, x.order.Total))
+                x.order.Id, x.order.Number, x.Name, x.order.Status.ToString(), x.order.OrderDate, x.order.Total,\n                x.order.Items.Select(i => new PurchaseOrderItemDto(i.Id, i.ProductId, i.ProductNameSnapshot, i.Quantity, i.QuantityReceived, i.UnitCost, i.LineTotal)).ToList()))
             .ToListAsync(cancellationToken);
 
         return new PagedResult<PurchaseOrderListItemDto>(items, totalCount, request.Page, request.PageSize);
