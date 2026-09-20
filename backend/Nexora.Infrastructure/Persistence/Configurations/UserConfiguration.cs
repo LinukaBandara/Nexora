@@ -14,11 +14,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.FullName).HasMaxLength(256).IsRequired();
         builder.Property(u => u.PasswordHash).IsRequired();
 
-        // Email is unique per-organization, not globally - two different
-        // businesses can each have an "admin@theirbusiness.com" style
-        // internal user without colliding. Login resolves the org from
-        // the email at authentication time via IgnoreQueryFilters().
-        builder.HasIndex(u => new { u.OrganizationId, u.Email }).IsUnique();
+        // Login accepts only email + password, so email must be globally unique.
+        // Otherwise the cross-tenant IgnoreQueryFilters() lookup could resolve
+        // the same email to an arbitrary organization.
+        builder.HasIndex(u => u.Email).IsUnique();
 
         // Postgres optimistic concurrency via the built-in xmin system column -
         // same pattern applied to every entity, see ModelBuilderExtensions.
