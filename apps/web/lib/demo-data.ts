@@ -19,6 +19,21 @@ export const DEMO_USER = {
   ],
 };
 
+const DEMO_STORAGE_KEY = "nexora-demo-state-v1";
+
+function readDemoState() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DEMO_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function writeDemoState(state: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(state)); } catch {}
+}
+
 const products = [
   { id: "p1", sku: "NX-001", name: "Premium Fertilizer 25kg", categoryName: "Agriculture", unitAbbreviation: "bag", sellingPrice: 12500, totalOnHand: 42, reorderLevel: 20, isLowStock: false },
   { id: "p2", sku: "NX-002", name: "Organic Soil Mix", categoryName: "Agriculture", unitAbbreviation: "bag", sellingPrice: 4200, totalOnHand: 18, reorderLevel: 25, isLowStock: true },
@@ -50,9 +65,22 @@ const purchaseOrders = [
   { id: "po2", number: "PO-2026-0013", supplierName: "Island Equipment Traders", status: "PendingApproval", orderDate: "2026-09-17", total: 88400 },
 ];
 
-export function demoResponse(path: string[], search: string, method: string) {
+export function demoResponse(path: string[], search: string, method: string, body?: string) {
+  let requestBody: Record<string, unknown> = {};
+  try { requestBody = body ? JSON.parse(body) : {}; } catch {}
+
   const key = path.join("/");
   const params = new URLSearchParams(search);
+  const stored = readDemoState();
+  const state = {
+    products: stored?.products ?? products,
+    customers: stored?.customers ?? customers,
+    suppliers: stored?.suppliers ?? suppliers,
+    salesOrders: stored?.salesOrders ?? salesOrders,
+    purchaseOrders: stored?.purchaseOrders ?? purchaseOrders,
+    notifications: stored?.notifications ?? null,
+  };
+  const save = () => writeDemoState(state);
 
   if (key === "auth/me" && method === "GET") return DEMO_USER;
 
@@ -83,7 +111,7 @@ export function demoResponse(path: string[], search: string, method: string) {
   if (key === "inventory/products" && method === "GET") {
     const searchValue = (params.get("search") ?? "").toLowerCase();
     const lowOnly = params.get("lowStockOnly") === "true";
-    const filtered = products.filter(
+    const filtered = state.products.filter(
       (p) => (!searchValue || `${p.name} ${p.sku}`.toLowerCase().includes(searchValue)) && (!lowOnly || p.isLowStock),
     );
     return { items: filtered, totalCount: filtered.length, page: 1, pageSize: 25 };
@@ -106,16 +134,16 @@ export function demoResponse(path: string[], search: string, method: string) {
     ];
   }
 
-  if (key === "sales/customers" && method === "GET") return { items: customers, totalCount: customers.length, page: 1, pageSize: 25 };
+  if (key === "sales/customers" && method === "GET") return { items: state.customers, totalCount: state.customers.length, page: 1, pageSize: 25 };
 
   if (key === "sales/orders" && method === "GET") {
     const status = params.get("status");
-    const items = status ? salesOrders.filter((o) => o.status === status) : salesOrders;
+    const items = status ? state.salesOrders.filter((o) => o.status === status) : state.salesOrders;
     return { items, totalCount: items.length, page: 1, pageSize: 25 };
   }
 
-  if (key === "purchasing/suppliers" && method === "GET") return { items: suppliers, totalCount: suppliers.length, page: 1, pageSize: 25 };
-  if (key === "purchasing/orders" && method === "GET") return { items: purchaseOrders, totalCount: purchaseOrders.length, page: 1, pageSize: 25 };
+  if (key === "purchasing/suppliers" && method === "GET") return { items: state.suppliers, totalCount: state.suppliers.length, page: 1, pageSize: 25 };
+  if (key === "purchasing/orders" && method === "GET") return { items: state.purchaseOrders, totalCount: state.purchaseOrders.length, page: 1, pageSize: 25 };
 
   if (key === "finance/summary" && method === "GET") {
     return { income: 1487200, expenses: 926500, netCashFlow: 560700, receivables: 684300, payables: 412800 };
@@ -135,16 +163,26 @@ export function demoResponse(path: string[], search: string, method: string) {
   }
 
   if (key === "notifications" && method === "GET") {
-    return {
-      items: [
-        { id: "n1", type: "LowStock", title: "Low stock alert", message: "Premium Seed Pack is below its reorder level.", entityType: "Product", entityId: "p4", isRead: false, createdAt: new Date().toISOString() },
-        { id: "n2", type: "Approval", title: "Approval required", message: "Sales order SO-2026-0019 is waiting for approval.", entityType: "SalesOrder", entityId: "so2", isRead: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
-        { id: "n3", type: "Payment", title: "Payment received", message: "Balangoda Agro Centre payment was recorded.", entityType: "Payment", entityId: "pay1", isRead: true, createdAt: new Date(Date.now() - 7200000).toISOString() },
-      ],
-      totalCount: 3,
-      page: 1,
-      pageSize: 25,
-    };
+    const notificationItems = state.notifications ?? [
+      { id: "n1", type: "LowStock", title: "Low stock alert", message: "Premium Seed Pack is below its reorder level.", entityType: "Product", entityId: "p4", isRead: false, createdAt: new Date().toISOString() },
+      { id: "n2", type: "Approval", title: "Approval required", message: "Sales order SO-2026-0019 is waiting for approval.", entityType: "SalesOrder", entityId: "so2", isRead: false, createdAt: new Date(Date.now() - 3600000).toISOString() },
+      { id: "n3", type: "Payment", title: "Payment received", message: "Balangoda Agro Centre payment was recorded.", entityType: "Payment", entityId: "pay1", isRead: true, createdAt: new Date(Date.now() - 7200000).toISOString() },
+    ];
+    state.notifications = notificationItems;
+    save();
+    const unreadOnly = params.get("unreadOnly") === "true";
+    const visible = unreadOnly ? notificationItems.filter((n: { isRead: boolean }) => !n.isRead) : notificationItems;
+    return { items: visible, totalCount: visible.length, page: 1, pageSize: 25 };
+  }
+
+  if (key.startsWith("notifications/") && method === "POST") {
+    const notificationId = path[1];
+    const notificationItems = state.notifications ?? [];
+    const item = notificationItems.find((n: { id: string }) => n.id === notificationId);
+    if (item) item.isRead = true;
+    state.notifications = notificationItems;
+    save();
+    return undefined;
   }
 
   if (key === "sync/status" && method === "GET") {
@@ -160,6 +198,58 @@ export function demoResponse(path: string[], search: string, method: string) {
         { aggregateType: "Customer", eventType: "CustomerUpdated", outcome: "Conflict", at: new Date(Date.now() - 240000).toISOString() },
       ],
     };
+  }
+
+  if (method === "POST" && key === "inventory/products") {
+    const product = {
+      id: `demo-product-${Date.now()}`,
+      sku: String(requestBody.sku ?? "NX-DEMO-" + String(state.products.length + 1).padStart(3, "0")),
+      name: String(requestBody.name ?? "Demo Product"),
+      categoryName: String(requestBody.categoryId ?? "General"),
+      unitAbbreviation: "pcs",
+      sellingPrice: Number(requestBody.sellingPrice ?? 0),
+      totalOnHand: 0,
+      reorderLevel: Number(requestBody.reorderLevel ?? 0),
+      isLowStock: false,
+    };
+    state.products = [...state.products, product];
+    save();
+    return { id: product.id, demo: true };
+  }
+
+  if (method === "POST" && key === "sales/customers") {
+    const customer = {
+      id: `demo-customer-${Date.now()}`,
+      name: String(requestBody.name ?? "Demo Customer"),
+      email: String(requestBody.email ?? "demo@customer.local"),
+      phone: String(requestBody.phone ?? "+94 70 000 0000"),
+      isActive: true,
+    };
+    state.customers = [...state.customers, customer];
+    save();
+    return { id: customer.id, demo: true };
+  }
+
+  if (method === "POST" && key === "purchasing/suppliers") {
+    const supplier = {
+      id: `demo-supplier-${Date.now()}`,
+      name: String(requestBody.name ?? "Demo Supplier"),
+      email: String(requestBody.email ?? "demo@supplier.local"),
+      phone: String(requestBody.phone ?? "+94 70 000 0001"),
+      isActive: true,
+    };
+    state.suppliers = [...state.suppliers, supplier];
+    save();
+    return { id: supplier.id, demo: true };
+  }
+
+  if (method === "POST" && key.endsWith("/approve")) {
+    const collection = key.startsWith("sales/orders/") ? state.salesOrders : state.purchaseOrders;
+    const id = path[2];
+    const item = collection.find((entry: { id: string }) => entry.id === id);
+    if (item) item.status = "Approved";
+    save();
+    return undefined;
   }
 
   if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) return { id: "demo-created", demo: true };
