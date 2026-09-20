@@ -76,7 +76,7 @@ export default function InventoryPage() {
         <KpiCard label="Catalog Products" value={totalCount.toLocaleString()} variant="dark" tag="Live Stock" changeLabel="100% synchronized" changeDirection="up" />
         <KpiCard label="Healthy Stock" value={healthyCount.toLocaleString()} detail={`${healthyCount} items above reorder target`} changeLabel="Normal operations" changeDirection="up" />
         <KpiCard label="Low Stock Alerts" value={lowStockCount.toLocaleString()} detail={lowStockCount > 0 ? `${lowStockCount} items need reordering` : "Zero shortages reported"} changeLabel={lowStockCount > 0 ? "Requires restock" : "Optimal"} changeDirection={lowStockCount > 0 ? "down" : "up"} />
-        <KpiCard label="Estimated Stock Value" value={<MoneyDisplay amount={estimatedCatalogValue} />} detail="Based on active on-hand units" changeLabel="+4.2% catalog growth" changeDirection="up" />
+        <KpiCard label="Estimated Stock Value" value={<MoneyDisplay amount={estimatedCatalogValue} />} detail="Based on visible on-hand units" changeLabel="Current page valuation" changeDirection="flat" />
       </section>
 
       <div className="overflow-hidden rounded-[18px] border border-[#E3E9E5] bg-white shadow-sm">
