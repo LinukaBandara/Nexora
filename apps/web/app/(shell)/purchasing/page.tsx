@@ -94,6 +94,13 @@ export default function PurchasingPage() {
     }
 
 
+
+    }, [activeTab, page, search]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
   async function handleApprove(id: string, number: string) {
     setIsApprovingId(id);
     try {
