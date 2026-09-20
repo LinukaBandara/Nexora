@@ -89,16 +89,30 @@ export function demoResponse(path: string[], search: string, method: string, bod
       const date = new Date(Date.now() - (13 - index) * 86400000).toISOString().slice(0, 10);
       return { date, revenue: 65000 + ((index * 17321) % 90000) };
     });
+    const inventoryValue = state.products.reduce(
+      (sum: number, p: { sellingPrice: number; totalOnHand: number }) => sum + p.sellingPrice * p.totalOnHand,
+      0,
+    );
+    const orderCount = state.salesOrders.length;
+    const topProducts = state.products.slice(0, 4).map((p: { name: string }, i: number) => ({
+      name: p.name,
+      quantitySold: 58 - i * 9,
+      revenue: 312000 - i * 41000,
+    }));
     return {
       revenue: 1487200,
-      orderCount: 86,
-      inventoryValue: 4265800,
+      orderCount,
+      inventoryValue,
       outstandingReceivables: 684300,
       revenueTrend,
-      topProducts: products.slice(0, 4).map((p, i) => ({ name: p.name, quantitySold: 58 - i * 9, revenue: 312000 - i * 41000 })),
-      lowStockAlerts: products
-        .filter((p) => p.isLowStock)
-        .map((p) => ({ productName: p.name, totalOnHand: p.totalOnHand, reorderLevel: p.reorderLevel })),
+      topProducts,
+      lowStockAlerts: state.products
+        .filter((p: { isLowStock: boolean }) => p.isLowStock)
+        .map((p: { name: string; totalOnHand: number; reorderLevel: number }) => ({
+          productName: p.name,
+          totalOnHand: p.totalOnHand,
+          reorderLevel: p.reorderLevel,
+        })),
       recentActivity: [
         { description: "Sales order SO-2026-0018 approved", at: new Date().toISOString() },
         { description: "Purchase order PO-2026-0013 created", at: new Date(Date.now() - 3600000).toISOString() },
@@ -107,7 +121,6 @@ export function demoResponse(path: string[], search: string, method: string, bod
       ],
     };
   }
-
   if (key === "inventory/products" && method === "GET") {
     const searchValue = (params.get("search") ?? "").toLowerCase();
     const lowOnly = params.get("lowStockOnly") === "true";
