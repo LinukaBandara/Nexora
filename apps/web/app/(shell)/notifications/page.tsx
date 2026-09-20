@@ -50,6 +50,13 @@ export default function NotificationsPage() {
     }
 
 
+
+    }, [page, unreadOnly]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
   async function handleMarkRead(id: string) {
     setReadingId(id);
     try {
