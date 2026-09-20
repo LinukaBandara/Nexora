@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   approvePurchaseOrder,
   receiveGoods,
@@ -74,7 +74,7 @@ export default function PurchasingPage() {
       .catch(() => {});
   }, []);
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -92,11 +92,7 @@ export default function PurchasingPage() {
     } finally {
       setLoading(false);
     }
-  }
 
-  useEffect(() => {
-    load();
-  }, [activeTab, page, search]);
 
   async function handleApprove(id: string, number: string) {
     setIsApprovingId(id);
