@@ -30,9 +30,11 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResult>
 
     public async Task<LoginResult> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
+        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+
         var user = await _db.Users
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(u => u.Email == request.Email.ToLowerInvariant(), cancellationToken);
+            .SingleOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
 
         // Deliberately identical error for unknown, inactive, locked, and bad-password
         // accounts so authentication does not become a user-enumeration oracle.
