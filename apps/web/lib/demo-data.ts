@@ -55,14 +55,69 @@ const suppliers = [
 ];
 
 const salesOrders = [
-  { id: "so1", number: "SO-2026-0018", customerName: "Balangoda Agro Centre", status: "Approved", orderDate: "2026-09-17", total: 186500 },
-  { id: "so2", number: "SO-2026-0019", customerName: "Sabaragamuwa Farmers Co-op", status: "PendingApproval", orderDate: "2026-09-17", total: 94200 },
-  { id: "so3", number: "SO-2026-0020", customerName: "Green Valley Holdings", status: "Invoiced", orderDate: "2026-09-16", total: 127800 },
+  {
+    id: "so1",
+    number: "SO-2026-0018",
+    customerName: "Balangoda Agro Centre",
+    status: "Approved",
+    orderDate: "2026-09-17",
+    total: 164000,
+    items: [
+      { id: "so1-i1", productId: "p1", productName: "Premium Fertilizer 25kg", quantity: 10, quantityInvoiced: 0, unitPrice: 12500, lineTotal: 125000 },
+      { id: "so1-i2", productId: "p3", productName: "Crop Protection Kit", quantity: 5, quantityInvoiced: 0, unitPrice: 7800, lineTotal: 39000 },
+    ],
+  },
+  {
+    id: "so2",
+    number: "SO-2026-0019",
+    customerName: "Sabaragamuwa Farmers Co-op",
+    status: "PendingApproval",
+    orderDate: "2026-09-17",
+    total: 94100,
+    items: [
+      { id: "so2-i1", productId: "p2", productName: "Organic Soil Mix", quantity: 12, quantityInvoiced: 0, unitPrice: 4200, lineTotal: 50400 },
+      { id: "so2-i2", productId: "p4", productName: "Premium Seed Pack", quantity: 23, quantityInvoiced: 0, unitPrice: 1850, lineTotal: 42550 },
+    ],
+  },
+  {
+    id: "so3",
+    number: "SO-2026-0020",
+    customerName: "Green Valley Holdings",
+    status: "Invoiced",
+    orderDate: "2026-09-16",
+    total: 127800,
+    items: [
+      { id: "so3-i1", productId: "p1", productName: "Premium Fertilizer 25kg", quantity: 6, quantityInvoiced: 6, unitPrice: 12500, lineTotal: 75000 },
+      { id: "so3-i2", productId: "p5", productName: "Irrigation Connector", quantity: 48, quantityInvoiced: 48, unitPrice: 1100, lineTotal: 52800 },
+    ],
+  },
 ];
 
 const purchaseOrders = [
-  { id: "po1", number: "PO-2026-0012", supplierName: "Ceylon Agri Supply", status: "Approved", orderDate: "2026-09-16", total: 215000 },
-  { id: "po2", number: "PO-2026-0013", supplierName: "Island Equipment Traders", status: "PendingApproval", orderDate: "2026-09-17", total: 88400 },
+  {
+    id: "po1",
+    number: "PO-2026-0012",
+    supplierName: "Ceylon Agri Supply",
+    status: "Approved",
+    orderDate: "2026-09-16",
+    total: 215000,
+    items: [
+      { id: "po1-i1", productId: "p1", productName: "Premium Fertilizer 25kg", quantity: 10, quantityReceived: 0, unitCost: 12500, lineTotal: 125000 },
+      { id: "po1-i2", productId: "p3", productName: "Crop Protection Kit", quantity: 10, quantityReceived: 0, unitCost: 9000, lineTotal: 90000 },
+    ],
+  },
+  {
+    id: "po2",
+    number: "PO-2026-0013",
+    supplierName: "Island Equipment Traders",
+    status: "PendingApproval",
+    orderDate: "2026-09-17",
+    total: 88400,
+    items: [
+      { id: "po2-i1", productId: "p4", productName: "Premium Seed Pack", quantity: 20, quantityReceived: 0, unitCost: 1850, lineTotal: 37000 },
+      { id: "po2-i2", productId: "p5", productName: "Irrigation Connector", quantity: 50, quantityReceived: 0, unitCost: 1028, lineTotal: 51400 },
+    ],
+  },
 ];
 
 export function demoResponse(path: string[], search: string, method: string, body?: string) {
@@ -79,7 +134,16 @@ export function demoResponse(path: string[], search: string, method: string, bod
     salesOrders: stored?.salesOrders ?? salesOrders,
     purchaseOrders: stored?.purchaseOrders ?? purchaseOrders,
     notifications: stored?.notifications ?? null,
+    invoices: stored?.invoices ?? [],
   };
+  state.salesOrders = state.salesOrders.map((order: any) => ({
+    ...order,
+    items: order.items ?? [],
+  }));
+  state.purchaseOrders = state.purchaseOrders.map((order: any) => ({
+    ...order,
+    items: order.items ?? [],
+  }));
   const save = () => writeDemoState(state);
 
   if (key === "auth/me" && method === "GET") return DEMO_USER;
@@ -158,7 +222,49 @@ export function demoResponse(path: string[], search: string, method: string, bod
   if (key === "purchasing/suppliers" && method === "GET") return { items: state.suppliers, totalCount: state.suppliers.length, page: 1, pageSize: 25 };
   if (key === "purchasing/orders" && method === "GET") return { items: state.purchaseOrders, totalCount: state.purchaseOrders.length, page: 1, pageSize: 25 };
 
-  if (key.startsWith("sales/invoices/") && method === "GET") {\n    const invoice = state.invoices.find((i: { id: string }) => i.id === path[2]);\n    return invoice ?? {};\n  }\n\n  if (key.startsWith("sales/invoices/") && key.endsWith("/payments") && method === "POST") {\n    const invoice = state.invoices.find((i: { id: string }) => i.id === path[2]);\n    if (!invoice) return {};\n    const amount = Number(requestBody.amount ?? 0);\n    invoice.amountPaid += amount;\n    invoice.amountDue = Math.max(0, invoice.total - invoice.amountPaid);\n    invoice.status = invoice.amountDue === 0 ? "Paid" : "PartiallyPaid";\n    invoice.payments.push({ id: `demo-payment-${Date.now()}`, amount, method: String(requestBody.method ?? "BankTransfer"), reference: requestBody.reference ?? null, receivedAt: new Date().toISOString() });\n    save();\n    return { paymentId: invoice.payments[invoice.payments.length - 1].id, demo: true };\n  }\n\n  if (key.startsWith("sales/orders/") && key.endsWith("/invoices") && method === "POST") {\n    const order = state.salesOrders.find((o: { id: string }) => o.id === path[2]);\n    if (!order) return {};\n    const lines = Array.isArray(requestBody.lines) ? requestBody.lines as { salesOrderItemId: string; quantity: number }[] : [];\n    const invoiceItems = lines.map((line) => { const item = order.items.find((i: { id: string }) => i.id === line.salesOrderItemId); const qty = Number(line.quantity); return { productName: item?.productName ?? "Product", quantity: qty, unitPrice: item?.unitPrice ?? 0, lineTotal: qty * (item?.unitPrice ?? 0) }; });\n    lines.forEach((line) => { const item = order.items.find((i: { id: string }) => i.id === line.salesOrderItemId); if (item) item.quantityInvoiced += Number(line.quantity); });\n    const total = invoiceItems.reduce((sum, i) => sum + i.lineTotal, 0);\n    order.status = order.items.every((i: { quantity: number; quantityInvoiced: number }) => i.quantityInvoiced >= i.quantity) ? "Invoiced" : "PartiallyInvoiced";\n    const invoice = { id: `demo-invoice-${Date.now()}`, number: `INV-DEMO-${Date.now().toString().slice(-6)}`, customerName: order.customerName, status: "Unpaid", issueDate: new Date().toISOString().slice(0,10), dueDate: new Date(Date.now()+30*86400000).toISOString().slice(0,10), subtotal: total, total, amountPaid: 0, amountDue: total, items: invoiceItems, payments: [] };\n    state.invoices.push(invoice); save(); return { invoiceId: invoice.id, demo: true };\n  }\n\n  if (key.startsWith("purchasing/orders/") && key.endsWith("/receipts") && method === "POST") {\n    const order = state.purchaseOrders.find((o: { id: string }) => o.id === path[2]);\n    if (!order) return {};\n    const lines = Array.isArray(requestBody.lines) ? requestBody.lines as { purchaseOrderItemId: string; quantity: number }[] : [];\n    lines.forEach((line) => { const item = order.items.find((i: { id: string }) => i.id === line.purchaseOrderItemId); if (item) item.quantityReceived += Number(line.quantity); });\n    order.status = order.items.every((i: { quantity: number; quantityReceived: number }) => i.quantityReceived >= i.quantity) ? "Received" : "PartiallyReceived";\n    save(); return { receiptId: `demo-receipt-${Date.now()}`, demo: true };\n  }\n\n  if (key.startsWith("purchasing/orders/") && key.endsWith("/supplier-invoices") && method === "POST") {\n    save(); return { invoiceId: `demo-supplier-invoice-${Date.now()}`, demo: true };\n  }\n\n  if (key === "finance/summary" && method === "GET") {
+  if (key.startsWith("sales/invoices/") && method === "GET") {
+    const invoice = state.invoices.find((i: { id: string }) => i.id === path[2]);
+    return invoice ?? {};
+  }
+
+  if (key.startsWith("sales/invoices/") && key.endsWith("/payments") && method === "POST") {
+    const invoice = state.invoices.find((i: { id: string }) => i.id === path[2]);
+    if (!invoice) return {};
+    const amount = Number(requestBody.amount ?? 0);
+    invoice.amountPaid += amount;
+    invoice.amountDue = Math.max(0, invoice.total - invoice.amountPaid);
+    invoice.status = invoice.amountDue === 0 ? "Paid" : "PartiallyPaid";
+    invoice.payments.push({ id: `demo-payment-${Date.now()}`, amount, method: String(requestBody.method ?? "BankTransfer"), reference: requestBody.reference ?? null, receivedAt: new Date().toISOString() });
+    save();
+    return { paymentId: invoice.payments[invoice.payments.length - 1].id, demo: true };
+  }
+
+  if (key.startsWith("sales/orders/") && key.endsWith("/invoices") && method === "POST") {
+    const order = state.salesOrders.find((o: { id: string }) => o.id === path[2]);
+    if (!order) return {};
+    const lines = Array.isArray(requestBody.lines) ? requestBody.lines as { salesOrderItemId: string; quantity: number }[] : [];
+    const invoiceItems = lines.map((line) => { const item = order.items.find((i: { id: string }) => i.id === line.salesOrderItemId); const qty = Number(line.quantity); return { productName: item?.productName ?? "Product", quantity: qty, unitPrice: item?.unitPrice ?? 0, lineTotal: qty * (item?.unitPrice ?? 0) }; });
+    lines.forEach((line) => { const item = order.items.find((i: { id: string }) => i.id === line.salesOrderItemId); if (item) item.quantityInvoiced += Number(line.quantity); });
+    const total = invoiceItems.reduce((sum, i) => sum + i.lineTotal, 0);
+    order.status = order.items.every((i: { quantity: number; quantityInvoiced: number }) => i.quantityInvoiced >= i.quantity) ? "Invoiced" : "PartiallyInvoiced";
+    const invoice = { id: `demo-invoice-${Date.now()}`, number: `INV-DEMO-${Date.now().toString().slice(-6)}`, customerName: order.customerName, status: "Unpaid", issueDate: new Date().toISOString().slice(0,10), dueDate: new Date(Date.now()+30*86400000).toISOString().slice(0,10), subtotal: total, total, amountPaid: 0, amountDue: total, items: invoiceItems, payments: [] };
+    state.invoices.push(invoice); save(); return { invoiceId: invoice.id, demo: true };
+  }
+
+  if (key.startsWith("purchasing/orders/") && key.endsWith("/receipts") && method === "POST") {
+    const order = state.purchaseOrders.find((o: { id: string }) => o.id === path[2]);
+    if (!order) return {};
+    const lines = Array.isArray(requestBody.lines) ? requestBody.lines as { purchaseOrderItemId: string; quantity: number }[] : [];
+    lines.forEach((line) => { const item = order.items.find((i: { id: string }) => i.id === line.purchaseOrderItemId); if (item) item.quantityReceived += Number(line.quantity); });
+    order.status = order.items.every((i: { quantity: number; quantityReceived: number }) => i.quantityReceived >= i.quantity) ? "Received" : "PartiallyReceived";
+    save(); return { receiptId: `demo-receipt-${Date.now()}`, demo: true };
+  }
+
+  if (key.startsWith("purchasing/orders/") && key.endsWith("/supplier-invoices") && method === "POST") {
+    save(); return { invoiceId: `demo-supplier-invoice-${Date.now()}`, demo: true };
+  }
+
+  if (key === "finance/summary" && method === "GET") {
     return { income: 1487200, expenses: 926500, netCashFlow: 560700, receivables: 684300, payables: 412800 };
   }
 
