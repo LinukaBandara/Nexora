@@ -51,7 +51,7 @@ public class NexoraDbContext : DbContext, IApplicationDbContext
     public DbSet<WarehouseLocation> WarehouseLocations => Set<WarehouseLocation>();
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
-    public DbSet<StockAdjustments> StockAdjustments => Set<StockAdjustments>();
+    public DbSet<StockAdjustment> StockAdjustments => Set<StockAdjustment>();
     public DbSet<StockTransfer> StockTransfers => Set<StockTransfer>();
     public DbSet<StockTransferItem> StockTransferItems => Set<StockTransferItem>();
 
@@ -69,7 +69,7 @@ public class NexoraDbContext : DbContext, IApplicationDbContext
     public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
     public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
-    public DbSet<GoodsReceiptItem> GoodsReceiptItems => Set<GoodsReceiptItems>();
+    public DbSet<GoodsReceiptItem> GoodsReceiptItems => Set<GoodsReceiptItem>();
     public DbSet<SupplierInvoice> SupplierInvoices => Set<SupplierInvoice>();
 
     public DbSet<Account> Accounts => Set<Account>();
@@ -77,7 +77,7 @@ public class NexoraDbContext : DbContext, IApplicationDbContext
     public DbSet<Income> Incomes => Set<Income>();
 
     public DbSet<SyncOutboxEvent> SyncOutboxEvents => Set<SyncOutboxEvent>();
-    public DbSet<SyncInboxEvent> SyncInboxEvents => Set<SyncInboxEvents>();
+    public DbSet<SyncInboxEvent> SyncInboxEvents => Set<SyncInboxEvent>();
     public DbSet<SyncConflict> SyncConflicts => Set<SyncConflict>();
     public DbSet<SyncCheckpoint> SyncCheckpoints => Set<SyncCheckpoint>();
     public DbSet<NodeRegistration> NodeRegistrations => Set<NodeRegistration>();
