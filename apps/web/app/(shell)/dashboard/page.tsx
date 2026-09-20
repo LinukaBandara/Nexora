@@ -67,7 +67,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <div className="flex items-center gap-2 self-start rounded-[11px] border border-border bg-white px-3.5 py-2.5 text-[11px] font-medium text-text-secondary shadow-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            {startOfMonthISO()} — {todayISO()}
+            <span className="whitespace-nowrap">{startOfMonthISO()} — {todayISO()}</span>
           </div>
         </div>
       </header>
@@ -89,7 +89,7 @@ export default function DashboardPage() {
               <p className="mt-1 text-[11px] text-text-muted">Daily revenue generated across the business</p>
             </div>
             <div className="flex items-center gap-2">
-              <StatusBadge label="Live" tone="success" />
+              <StatusBadge label="Current period" tone="info" />
               {/* Chart mode toggle */}
               <div className="flex items-center gap-0.5 rounded-lg bg-surface-secondary p-0.5">
                 <button
