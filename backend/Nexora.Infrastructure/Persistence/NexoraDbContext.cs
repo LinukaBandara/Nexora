@@ -51,7 +51,7 @@ public class NexoraDbContext : DbContext, IApplicationDbContext
     public DbSet<WarehouseLocation> WarehouseLocations => Set<WarehouseLocation>();
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
-    public DbSet<StockAdjustment> StockAdjustments => Set<StockAdjustment>();
+    public DbSet<StockAdjustments> StockAdjustments => Set<StockAdjustments>();
     public DbSet<StockTransfer> StockTransfers => Set<StockTransfer>();
     public DbSet<StockTransferItem> StockTransferItems => Set<StockTransferItem>();
 
@@ -69,7 +69,7 @@ public class NexoraDbContext : DbContext, IApplicationDbContext
     public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
     public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
     public DbSet<GoodsReceipt> GoodsReceipts => Set<GoodsReceipt>();
-    public DbSet<GoodsReceiptItem> GoodsReceiptItems => Set<GoodsReceiptItem>();
+    public DbSet<GoodsReceiptItem> GoodsReceiptItems => Set<GoodsReceiptItems>();
     public DbSet<SupplierInvoice> SupplierInvoices => Set<SupplierInvoice>();
 
     public DbSet<Account> Accounts => Set<Account>();
@@ -77,7 +77,7 @@ public class NexoraDbContext : DbContext, IApplicationDbContext
     public DbSet<Income> Incomes => Set<Income>();
 
     public DbSet<SyncOutboxEvent> SyncOutboxEvents => Set<SyncOutboxEvent>();
-    public DbSet<SyncInboxEvent> SyncInboxEvents => Set<SyncInboxEvent>();
+    public DbSet<SyncInboxEvent> SyncInboxEvents => Set<SyncInboxEvents>();
     public DbSet<SyncConflict> SyncConflicts => Set<SyncConflict>();
     public DbSet<SyncCheckpoint> SyncCheckpoints => Set<SyncCheckpoint>();
     public DbSet<NodeRegistration> NodeRegistrations => Set<NodeRegistration>();
@@ -88,13 +88,6 @@ public class NexoraDbContext : DbContext, IApplicationDbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(NexoraDbContext).Assembly);
 
-        // Soft-delete filter for everything, plus a tenant filter for everything
-        // deriving from TenantEntity. This is applied centrally, once, here -
-        // not left to be remembered per-query. IgnoreQueryFilters() is used
-        // explicitly and rarely (auth lookups pre-tenant-resolution, admin tooling).
-        // Two separate generic helpers (constrained to TenantEntity vs BaseEntity)
-        // are used instead of a single one with a runtime cast, because EF Core
-        // cannot translate an (object) cast inside a query-filter expression to SQL.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             var clrType = entityType.ClrType;
@@ -119,8 +112,11 @@ public class NexoraDbContext : DbContext, IApplicationDbContext
     private static System.Linq.Expressions.Expression<Func<TEntity, bool>> BuildTenantFilter<TEntity>(ITenantContext tenantContext)
         where TEntity : TenantEntity
     {
-        return e => e.DeletedAt == null &&
-                     (!tenantContext.IsResolved || e.OrganizationId == tenantContext.OrganizationId);
+        return e => e.DeletedAt == null
+            && (!tenantContext.IsResolved || (
+                e.OrganizationId == tenantContext.OrganizationId
+                && (tenantContext.BranchId == null || e.BranchId == null || e.BranchId == tenantContext.BranchId)
+            ));
     }
 
     private static System.Linq.Expressions.Expression<Func<TEntity, bool>> BuildSoftDeleteOnlyFilter<TEntity>(ITenantContext tenantContext)
