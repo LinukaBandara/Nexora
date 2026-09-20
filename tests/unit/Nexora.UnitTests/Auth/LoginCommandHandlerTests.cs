@@ -72,7 +72,7 @@ public class LoginCommandHandlerTests
         // Even the CORRECT password is now rejected because the account is locked.
         var lockedOutAttempt = () => handler.Handle(new LoginCommand("owner@acme.test", "CorrectPassword1!"), default);
         await lockedOutAttempt.Should().ThrowAsync<UnauthorizedAccessException>()
-            .WithMessage("*locked*");
+            .WithMessage("Invalid email or password.");
     }
 
     [Fact]
