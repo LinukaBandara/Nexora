@@ -106,7 +106,7 @@ export default function SalesPage() {
           value={totalCount.toLocaleString()}
           variant="dark"
           tag="CRM Active"
-          changeLabel="+12% from last month"
+          changeLabel="Customer directory"
           changeDirection="up"
         />
         <KpiCard
