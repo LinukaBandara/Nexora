@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   getNotifications,
   markNotificationRead,
@@ -36,7 +36,7 @@ export default function NotificationsPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [readingId, setReadingId] = useState<string | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -48,11 +48,7 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false);
     }
-  }
 
-  useEffect(() => {
-    load();
-  }, [page, unreadOnly]);
 
   async function handleMarkRead(id: string) {
     setReadingId(id);
