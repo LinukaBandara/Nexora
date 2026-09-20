@@ -30,25 +30,22 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResult>
 
     public async Task<LoginResult> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        // IgnoreQueryFilters: at login time we don't yet have a resolved tenant context -
-        // the user's organization is what login resolves.
         var user = await _db.Users
             .IgnoreQueryFilters()
             .FirstOrDefaultAsync(u => u.Email == request.Email.ToLowerInvariant(), cancellationToken);
 
-        // Deliberately identical error for "no such user" and "wrong password" -
-        // never reveal which one it was.
+        // Deliberately identical error for unknown, inactive, locked, and bad-password
+        // accounts so authentication does not become a user-enumeration oracle.
         const string genericError = "Invalid email or password.";
 
         if (user is null)
             throw new UnauthorizedAccessException(genericError);
 
         if (user.IsLockedOut)
-            throw new UnauthorizedAccessException(
-                $"Account locked due to repeated failed attempts. Try again after {user.LockoutEnd:HH:mm}.");
+            throw new UnauthorizedAccessException(genericError);
 
         if (!user.IsActive)
-            throw new UnauthorizedAccessException("This account has been deactivated.");
+            throw new UnauthorizedAccessException(genericError);
 
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
         {
@@ -58,6 +55,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResult>
                 user.LockoutEnd = DateTimeOffset.UtcNow.Add(LockoutDuration);
                 user.AccessFailedCount = 0;
             }
+
             await _db.SaveChangesAsync(cancellationToken);
             throw new UnauthorizedAccessException(genericError);
         }
