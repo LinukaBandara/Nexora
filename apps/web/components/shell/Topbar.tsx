@@ -25,7 +25,7 @@ export function Topbar({ breadcrumb = "Overview", userEmail, onMenuClick }: Topb
       <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <MobileMenuButton onClick={onMenuClick ?? (() => {})} />
         <div className="hidden sm:block lg:hidden"><NexoraLogo compact dark /></div>
-        <button type="button" onClick={() => setProfileOpen(false)} className="hidden items-center gap-2 rounded-xl border border-[#E3E9E5] bg-[#F9FAF9] px-3.5 py-1.5 text-left transition-colors hover:border-[#D0DBD3] sm:flex">
+        <button type="button" onClick={() => setProfileOpen((open) => !open)} className="hidden items-center gap-2 rounded-xl border border-[#E3E9E5] bg-[#F9FAF9] px-3.5 py-1.5 text-left transition-colors hover:border-[#D0DBD3] sm:flex">
           <div className="flex flex-col"><span className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#768A7E]">Role</span><div className="flex items-center gap-1.5 text-[13px] font-bold text-[#142019]"><span>Executive Admin</span><ChevronDown size={14} className="text-[#65796E]" /></div></div>
         </button>
         <div className="hidden h-6 w-px bg-[#E2E8E4] md:block" />
