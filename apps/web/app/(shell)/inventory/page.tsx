@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getProducts, ProductListItem } from "@/lib/nexora-api";
 import { ApiError } from "@/lib/api";
@@ -38,7 +38,7 @@ export default function InventoryPage() {
     if (searchParams.get("action") === "create") setIsCreateOpen(true);
   }, [searchParams]);
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -50,11 +50,7 @@ export default function InventoryPage() {
     } finally {
       setLoading(false);
     }
-  }
 
-  useEffect(() => {
-    load();
-  }, [page, search, lowStockOnly]);
 
   function handleSearch(value: string) {
     setSearch(value);
