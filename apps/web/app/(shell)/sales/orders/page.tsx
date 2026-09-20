@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   getSalesOrders,
@@ -71,7 +71,7 @@ export default function SalesOrdersPage() {
       .catch(() => {});
   }, []);
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -87,11 +87,7 @@ export default function SalesOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }
 
-  useEffect(() => {
-    load();
-  }, [page, statusFilter]);
 
   async function handleApprove(id: string, number: string) {
     setApprovingId(id);
