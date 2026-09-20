@@ -113,15 +113,15 @@ export default function SalesPage() {
           label="Active Accounts"
           value={activeCount.toLocaleString()}
           detail={`${activeCount} in good standing`}
-          changeLabel="100% operational"
-          changeDirection="up"
+          changeLabel="Current page"
+          changeDirection="flat"
         />
         <KpiCard
-          label="Outstanding Balances"
-          value="LKR 684,300"
-          detail="3 invoices pending collection"
-          changeLabel="Healthy turnover"
-          changeDirection="up"
+          label="Current Page"
+          value={filteredCustomers.length.toLocaleString()}
+          detail="Customers shown after filters"
+          changeLabel="Directory view"
+          changeDirection="flat"
         />
       </section>
 
