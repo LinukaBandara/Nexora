@@ -14,14 +14,14 @@ const NAV_CONFIG: NavItemConfig[] = [
   { label: "Inventory", href: "/inventory", icon: Box, group: "menu", permissionKey: "inventory" },
   { label: "Purchasing", href: "/purchasing", icon: Truck, group: "operations", permissionKey: "purchasing" },
   { label: "Finance", href: "/finance", icon: CircleDollarSign, group: "operations", permissionKey: "finance" },
-  { label: "Notifications", href: "/notifications", icon: Bell, group: "system", permissionKey: null, badge: "3" },
+  { label: "Notifications", href: "/notifications", icon: Bell, group: "system", permissionKey: null },
   { label: "Sync Center", href: "/sync", icon: RefreshCw, group: "system", permissionKey: "sync" },
 ];
 const PERMISSION_ALIASES: Record<string, string[]> = { sales: ["sales.read", "sales.view", "sales.manage", "sales.approve"], inventory: ["inventory.read", "inventory.view", "inventory.manage"], purchasing: ["purchasing.read", "purchasing.view", "purchasing.manage", "purchasing.approve"], finance: ["finance.read", "finance.view", "finance.manage"], sync: ["system.sync.view", "sync.view", "sync.read"] };
 
-interface SidebarProps { permissions: string[]; open?: boolean; onClose?: () => void; userEmail?: string | null; }
+interface SidebarProps { permissions: string[]; open?: boolean; onClose?: () => void; userEmail?: string | null; unreadCount?: number; }
 
-export function Sidebar({ permissions, open = false, onClose, userEmail }: SidebarProps) {
+export function Sidebar({ permissions, open = false, onClose, userEmail, unreadCount = 0 }: SidebarProps) {
   const pathname = usePathname();
   const perms = new Set(permissions.map((p) => p.toLowerCase()));
   const filteredItems = NAV_CONFIG.filter((item) => item.permissionKey === null || (PERMISSION_ALIASES[item.permissionKey] ?? []).some((p) => perms.has(p)));
@@ -41,7 +41,7 @@ export function Sidebar({ permissions, open = false, onClose, userEmail }: Sideb
           {isActive && <span className="absolute -left-1 top-2 bottom-2 w-1.5 rounded-full bg-[#8EE04E]" />}
           <Icon size={18} strokeWidth={isActive ? 2.4 : 2} className={isActive ? "text-[#123B2A]" : "text-[#97BCAB] group-hover:text-white"} />
           <span className="flex-1 truncate">{item.label}</span>
-          {item.badge && !isActive && <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#8EE04E] px-1.5 text-[10px] font-bold text-[#0F2A1E]">{item.badge}</span>}
+          {item.label === "Notifications" && unreadCount > 0 && !isActive && <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#8EE04E] px-1.5 text-[10px] font-bold text-[#0F2A1E]">{unreadCount > 99 ? "99+" : unreadCount}</span>}
           {isActive && <ChevronRight size={14} className="text-[#123B2A]/70" />}
         </Link>;
       })}
