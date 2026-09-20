@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import {
   approvePurchaseOrder,
+  receiveGoods,
+  createSupplierInvoice,
   createSupplier,
   getMe,
   getPurchaseOrders,
@@ -58,6 +60,11 @@ export default function PurchasingPage() {
   const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
   const [isApprovingId, setIsApprovingId] = useState<string | null>(null);
   const [savingSupplier, setSavingSupplier] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrderListItem | null>(null);
+  const [receiving, setReceiving] = useState(false);
+  const [supplierInvoiceNumber, setSupplierInvoiceNumber] = useState("");
+  const [supplierInvoiceTotal, setSupplierInvoiceTotal] = useState("");
+  const [savingSupplierInvoice, setSavingSupplierInvoice] = useState(false);
 
   useEffect(() => {
     getMe()
@@ -130,6 +137,27 @@ export default function PurchasingPage() {
   const pendingOrdersCount = orders.filter((o) => o.status === "PendingApproval").length;
   const approvedOrdersCount = orders.filter((o) => o.status === "Approved" || o.status === "Received").length;
   const totalCommitted = orders.reduce((acc, curr) => acc + curr.total, 0);
+
+  function openOrder(order: PurchaseOrderListItem) { setSelectedOrder(order); setSupplierInvoiceNumber(""); setSupplierInvoiceTotal(String(order.total)); }
+
+  async function handleReceive() {
+    if (!selectedOrder) return;
+    const lines = selectedOrder.items.map(item => ({ purchaseOrderItemId: item.id, quantity: item.quantity - item.quantityReceived })).filter(item => item.quantity > 0);
+    if (!lines.length) return;
+    setReceiving(true);
+    try { await receiveGoods(selectedOrder.id, lines, "Received through NEXORA purchasing workflow"); setToastMessage(`Goods received for ${selectedOrder.number}.`); setSelectedOrder(null); await load(); }
+    catch (err) { setToastMessage(err instanceof ApiError ? err.message : "Unable to receive goods."); }
+    finally { setReceiving(false); }
+  }
+
+  async function handleSupplierInvoice() {
+    if (!selectedOrder || !supplierInvoiceNumber.trim()) return;
+    const total = Number(supplierInvoiceTotal); if (!total || total <= 0) return;
+    setSavingSupplierInvoice(true);
+    try { await createSupplierInvoice(selectedOrder.id, { supplierInvoiceNumber: supplierInvoiceNumber.trim(), total }); setToastMessage("Supplier invoice recorded."); setSupplierInvoiceNumber(""); }
+    catch (err) { setToastMessage(err instanceof ApiError ? err.message : "Unable to record supplier invoice."); }
+    finally { setSavingSupplierInvoice(false); }
+  }
 
   return (
     <div className="flex flex-col gap-6 sm:gap-7 pb-8">
@@ -307,7 +335,7 @@ export default function PurchasingPage() {
                               <span>Approved</span>
                             </span>
                           ) : (
-                            <span className="text-[11px] text-[#86998E]">Processed</span>
+                            <button onClick={() => openOrder(order)} className="inline-flex items-center gap-1 rounded-lg border border-[#D9E2DC] px-2.5 py-1.5 text-[11px] font-semibold text-[#234334] hover:bg-[#F4F7F5]">Open</button>
                           )}
                         </td>
                       </tr>
@@ -392,6 +420,32 @@ export default function PurchasingPage() {
       </div>
 
       {/* Add Supplier Dialog */}
+      {selectedOrder && activeTab === "orders" && (
+        <Dialog title={"Purchase Order " + selectedOrder.number} onClose={() => setSelectedOrder(null)}>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 rounded-xl bg-[#F7F9F7] p-3 text-xs">
+              <div><div className="text-[#718278]">Supplier</div><div className="mt-1 font-semibold text-[#142019]">{selectedOrder.supplierName}</div></div>
+              <div><div className="text-[#718278]">Status</div><div className="mt-1"><StatusBadge label={selectedOrder.status} tone={orderTones[selectedOrder.status] ?? "neutral"} /></div></div>
+            </div>
+            <div className="rounded-xl border border-[#E3E9E5] overflow-hidden">
+              <div className="border-b border-[#EAEFEA] bg-[#F9FAF9] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-[#6D8174]">Purchase lines</div>
+              <div className="divide-y divide-[#EAEFEA]">
+                {selectedOrder.items.map(item => <div key={item.id} className="flex items-center justify-between px-3 py-3 text-xs"><div><div className="font-semibold text-[#142019]">{item.productName}</div><div className="text-[#718278]">{item.quantityReceived} / {item.quantity} received</div></div><MoneyDisplay amount={item.lineTotal} /></div>)}
+              </div>
+            </div>
+            {(selectedOrder.status === "Approved" || selectedOrder.status === "PartiallyReceived") && (
+              <Button variant="primary" onClick={handleReceive} disabled={receiving} className="w-full justify-center bg-[#123B2A] text-white">{receiving ? "Receiving goods..." : "Receive Outstanding Goods"}</Button>
+            )}
+            {(selectedOrder.status === "Approved" || selectedOrder.status === "PartiallyReceived" || selectedOrder.status === "Received") && (
+              <div className="space-y-2 rounded-xl border border-[#D9E2DC] p-4">
+                <div className="text-xs font-bold text-[#142019]">Supplier invoice</div>
+                <div className="grid grid-cols-2 gap-2"><input value={supplierInvoiceNumber} onChange={e => setSupplierInvoiceNumber(e.target.value)} placeholder="Invoice number" className="h-9 rounded-lg border border-[#D9E2DC] px-3 text-xs outline-none" /><input type="number" min="0.01" step="0.01" value={supplierInvoiceTotal} onChange={e => setSupplierInvoiceTotal(e.target.value)} placeholder="Total" className="h-9 rounded-lg border border-[#D9E2DC] px-3 text-xs outline-none" /></div>
+                <Button variant="secondary" onClick={handleSupplierInvoice} disabled={savingSupplierInvoice || !supplierInvoiceNumber.trim()} className="w-full justify-center">{savingSupplierInvoice ? "Saving..." : "Record Supplier Invoice"}</Button>
+              </div>
+            )}
+          </div>
+        </Dialog>
+      )}
       {isSupplierModalOpen && (
         <Dialog title="Add approved supplier" onClose={() => setIsSupplierModalOpen(false)}>
           <form onSubmit={handleSaveSupplier} className="flex flex-col gap-4">
