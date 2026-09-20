@@ -52,6 +52,13 @@ export default function InventoryPage() {
     }
 
 
+
+    }, [page, search, lowStockOnly]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
   function handleSearch(value: string) {
     setSearch(value);
     setPage(1);
