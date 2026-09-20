@@ -189,7 +189,7 @@ export function demoResponse(path: string[], search: string, method: string, bod
     const searchValue = (params.get("search") ?? "").toLowerCase();
     const lowOnly = params.get("lowStockOnly") === "true";
     const filtered = state.products.filter(
-      (p) => (!searchValue || `${p.name} ${p.sku}`.toLowerCase().includes(searchValue)) && (!lowOnly || p.isLowStock),
+      (p: { name: string; sku: string; isLowStock: boolean }) => (!searchValue || `${p.name} ${p.sku}`.toLowerCase().includes(searchValue)) && (!lowOnly || p.isLowStock),
     );
     return { items: filtered, totalCount: filtered.length, page: 1, pageSize: 25 };
   }
@@ -215,7 +215,7 @@ export function demoResponse(path: string[], search: string, method: string, bod
 
   if (key === "sales/orders" && method === "GET") {
     const status = params.get("status");
-    const items = status ? state.salesOrders.filter((o) => o.status === status) : state.salesOrders;
+    const items = status ? state.salesOrders.filter((o: { status: string }) => o.status === status) : state.salesOrders;
     return { items, totalCount: items.length, page: 1, pageSize: 25 };
   }
 
