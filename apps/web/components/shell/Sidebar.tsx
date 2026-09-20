@@ -35,7 +35,7 @@ export function Sidebar({ permissions, open = false, onClose, userEmail }: Sideb
     <div className="space-y-1">
       <div className="px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#78A88F]">{title}</div>
       {items.map((item) => {
-        const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(`${item.href}/`));
+        const isActive = item.href === "/sales" ? pathname === "/sales" : pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(`${item.href}/`));
         const Icon = item.icon;
         return <Link key={item.href} href={item.href} onClick={onClose} className={clsx("group relative flex w-full items-center gap-3 rounded-[12px] px-3.5 py-2.5 text-[13px] font-medium transition-colors", isActive ? "bg-white text-[#123B2A] font-semibold shadow-sm" : "text-[#D3E5DB] hover:bg-white/[0.08] hover:text-white")}>
           {isActive && <span className="absolute -left-1 top-2 bottom-2 w-1.5 rounded-full bg-[#8EE04E]" />}
