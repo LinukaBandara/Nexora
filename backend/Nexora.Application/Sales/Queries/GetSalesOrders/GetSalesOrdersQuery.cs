@@ -35,7 +35,7 @@ public class GetSalesOrdersQueryHandler : IRequestHandler<GetSalesOrdersQuery, P
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(x => new SalesOrderListItemDto(
-                x.order.Id, x.order.Number, x.Name, x.order.Status.ToString(), x.order.OrderDate, x.order.Total))
+                x.order.Id, x.order.Number, x.Name, x.order.Status.ToString(), x.order.OrderDate, x.order.Total,\n                x.order.Items.Select(i => new SalesOrderItemDto(i.Id, i.ProductId, i.ProductNameSnapshot, i.Quantity, i.QuantityInvoiced, i.UnitPrice, i.LineTotal)).ToList()))
             .ToListAsync(cancellationToken);
 
         return new PagedResult<SalesOrderListItemDto>(items, totalCount, request.Page, request.PageSize);
