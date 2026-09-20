@@ -5,6 +5,9 @@ import Link from "next/link";
 import {
   getSalesOrders,
   approveSalesOrder,
+  createInvoice,
+  getInvoiceDetail,
+  recordPayment,
   getMe,
   SalesOrderListItem,
   SalesOrderStatus,
@@ -20,7 +23,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { TableSkeleton } from "@/components/ui/TableSkeleton";
 import { Toast } from "@/components/ui/Toast";
-import { Check, CheckCircle2, ChevronRight, FileText, Plus, ShoppingCart } from "lucide-react";
+import { Dialog } from "@/components/ui/Dialog";
+import { Check, CheckCircle2, FileText, ShoppingCart, Eye, CreditCard } from "lucide-react";
 
 const PAGE_SIZE = 25;
 
@@ -52,6 +56,12 @@ export default function SalesOrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<SalesOrderListItem | null>(null);
+  const [invoice, setInvoice] = useState<Awaited<ReturnType<typeof getInvoiceDetail>> | null>(null);
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("BankTransfer");
+  const [recordingPayment, setRecordingPayment] = useState(false);
 
   useEffect(() => {
     getMe()
@@ -99,6 +109,29 @@ export default function SalesOrdersPage() {
   const pendingCount = items.filter((o) => o.status === "PendingApproval").length;
   const approvedCount = items.filter((o) => o.status === "Approved" || o.status === "Invoiced").length;
   const totalVolume = items.reduce((acc, curr) => acc + curr.total, 0);
+
+  function openOrder(order: SalesOrderListItem) {
+    setSelectedOrder(order); setInvoice(null); setPaymentAmount("");
+  }
+
+  async function handleCreateInvoice() {
+    if (!selectedOrder) return;
+    const lines = selectedOrder.items.map(item => ({ salesOrderItemId: item.id, quantity: item.quantity - item.quantityInvoiced })).filter(item => item.quantity > 0);
+    if (!lines.length) return;
+    setCreatingInvoice(true);
+    try { const result = await createInvoice(selectedOrder.id, lines); setInvoice(await getInvoiceDetail(result.invoiceId)); setToastMessage("Invoice created successfully."); await load(); }
+    catch (err) { setToastMessage(err instanceof ApiError ? err.message : "Unable to create invoice."); }
+    finally { setCreatingInvoice(false); }
+  }
+
+  async function handleRecordPayment() {
+    if (!invoice) return;
+    const amount = Number(paymentAmount); if (!amount || amount <= 0) return;
+    setRecordingPayment(true);
+    try { await recordPayment(invoice.id, { amount, method: paymentMethod }); setInvoice(await getInvoiceDetail(invoice.id)); setPaymentAmount(""); setToastMessage("Payment recorded successfully."); }
+    catch (err) { setToastMessage(err instanceof ApiError ? err.message : "Unable to record payment."); }
+    finally { setRecordingPayment(false); }
+  }
 
   return (
     <div className="flex flex-col gap-6 sm:gap-7 pb-8">
@@ -258,7 +291,7 @@ export default function SalesOrdersPage() {
                             <span>Authorized</span>
                           </span>
                         ) : (
-                          <span className="text-[11px] text-[#86998E]">Processed</span>
+                          <button onClick={() => openOrder(order)} className="inline-flex items-center gap-1 rounded-lg border border-[#D9E2DC] px-2.5 py-1.5 text-[11px] font-semibold text-[#234334] hover:bg-[#F4F7F5]"><Eye size={13} /> Open</button>
                         )}
                       </td>
                     </tr>
@@ -276,6 +309,38 @@ export default function SalesOrdersPage() {
           </>
         )}
       </div>
+      {selectedOrder && (
+        <Dialog title={"Sales Order " + selectedOrder.number} onClose={() => setSelectedOrder(null)}>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 rounded-xl bg-[#F7F9F7] p-3 text-xs">
+              <div><div className="text-[#718278]">Customer</div><div className="mt-1 font-semibold text-[#142019]">{selectedOrder.customerName}</div></div>
+              <div><div className="text-[#718278]">Status</div><div className="mt-1"><StatusBadge label={selectedOrder.status} tone={statusTones[selectedOrder.status] ?? "neutral"} /></div></div>
+            </div>
+            <div className="rounded-xl border border-[#E3E9E5] overflow-hidden">
+              <div className="border-b border-[#EAEFEA] bg-[#F9FAF9] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-[#6D8174]">Order lines</div>
+              <div className="divide-y divide-[#EAEFEA]">
+                {selectedOrder.items.map(item => <div key={item.id} className="flex items-center justify-between px-3 py-3 text-xs"><div><div className="font-semibold text-[#142019]">{item.productName}</div><div className="text-[#718278]">{item.quantityInvoiced} / {item.quantity} invoiced</div></div><MoneyDisplay amount={item.lineTotal} /></div>)}
+              </div>
+            </div>
+            {!invoice && (selectedOrder.status === "Approved" || selectedOrder.status === "PartiallyInvoiced") && (
+              <Button variant="primary" onClick={handleCreateInvoice} disabled={creatingInvoice} className="w-full justify-center bg-[#123B2A] text-white">{creatingInvoice ? "Creating invoice..." : "Create Invoice"}</Button>
+            )}
+            {invoice && (
+              <div className="space-y-3 rounded-xl border border-[#D9E2DC] p-4">
+                <div className="flex items-center justify-between"><div><div className="text-sm font-bold text-[#142019]">{invoice.number}</div><div className="text-[11px] text-[#718278]">{invoice.status}</div></div><MoneyDisplay amount={invoice.amountDue} /></div>
+                <div className="text-[11px] text-[#718278]">Paid {invoice.amountPaid.toLocaleString()} · Due {invoice.amountDue.toLocaleString()}</div>
+                {invoice.amountDue > 0 && (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2"><input type="number" min="0.01" max={invoice.amountDue} step="0.01" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder="Payment amount" className="h-9 rounded-lg border border-[#D9E2DC] px-3 text-xs outline-none focus:border-[#1F7A4D]" /><select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="h-9 rounded-lg border border-[#D9E2DC] bg-white px-3 text-xs outline-none"><option>BankTransfer</option><option>Cash</option><option>Card</option><option>Cheque</option><option>Other</option></select></div>
+                    <Button variant="secondary" onClick={handleRecordPayment} disabled={recordingPayment || !paymentAmount} className="w-full justify-center"><CreditCard size={14} /> {recordingPayment ? "Recording..." : "Record Payment"}</Button>
+                  </div>
+                )}
+                {invoice.payments.length > 0 && <div className="border-t border-[#EAEFEA] pt-3 text-[11px] text-[#718278]">{invoice.payments.length} payment(s) recorded</div>}
+              </div>
+            )}
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 }
