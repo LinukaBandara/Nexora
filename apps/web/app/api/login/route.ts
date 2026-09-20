@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+const DEMO_MODE_ENABLED = process.env.NEXORA_DEMO_MODE === "true";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -44,8 +45,18 @@ export async function POST(request: NextRequest) {
     });
     return response;
   } catch {
+    if (!DEMO_MODE_ENABLED) {
+      return NextResponse.json(
+        { message: "NEXORA API is unavailable. Please try again later." },
+        { status: 503 },
+      );
+    }
+
     if (!body.email || !body.password) {
-      return NextResponse.json({ message: "Enter an email and password to continue in demo mode." }, { status: 400 });
+      return NextResponse.json(
+        { message: "Enter an email and password to continue in demo mode." },
+        { status: 400 },
+      );
     }
 
     const response = NextResponse.json({ userId: "demo-user", organizationId: "demo-org", demo: true });
