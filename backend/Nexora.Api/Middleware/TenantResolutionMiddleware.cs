@@ -8,9 +8,11 @@ namespace Nexora.Api.Middleware;
 /// NexoraDbContext's global query filters then read for every single query
 /// in the request. This is the one place tenant resolution happens - it is
 /// not re-derived or re-checked by individual handlers.
-/// Unauthenticated endpoints (login, register, health checks) simply have
-/// no tenant context set; IsResolved stays false and query filters no-op
-/// on the tenant clause (soft-delete filtering still applies).
+///
+/// Unauthenticated endpoints (login, register, health checks) have no tenant
+/// context and may continue without one. Authenticated requests, however,
+/// must always resolve a valid organization claim before reaching controllers;
+/// otherwise tenant query filters would intentionally fail open.
 /// </summary>
 public class TenantResolutionMiddleware
 {
@@ -25,11 +27,25 @@ public class TenantResolutionMiddleware
             var orgClaim = context.User.FindFirst("org_id")?.Value;
             var branchClaim = context.User.FindFirst("branch_id")?.Value;
 
-            if (Guid.TryParse(orgClaim, out var orgId))
+            if (!Guid.TryParse(orgClaim, out var orgId))
             {
-                Guid? branchId = Guid.TryParse(branchClaim, out var b) ? b : null;
-                tenantContext.Set(orgId, branchId);
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return;
             }
+
+            Guid? branchId = null;
+            if (!string.IsNullOrWhiteSpace(branchClaim))
+            {
+                if (!Guid.TryParse(branchClaim, out var parsedBranchId))
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    return;
+                }
+
+                branchId = parsedBranchId;
+            }
+
+            tenantContext.Set(orgId, branchId);
         }
 
         await _next(context);
