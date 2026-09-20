@@ -44,6 +44,13 @@ export default function SalesPage() {
     }
 
 
+
+    }, [page, search]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
   const activeCount = items.filter((c) => c.isActive).length;
   const filteredCustomers = items.filter((c) => {
     if (statusFilter === "active") return c.isActive;
