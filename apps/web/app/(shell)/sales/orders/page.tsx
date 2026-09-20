@@ -89,6 +89,13 @@ export default function SalesOrdersPage() {
     }
 
 
+
+    }, [page, statusFilter]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
   async function handleApprove(id: string, number: string) {
     setApprovingId(id);
     try {
