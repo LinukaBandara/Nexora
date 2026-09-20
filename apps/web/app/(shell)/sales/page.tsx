@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { getCustomers, CustomerListItem } from "@/lib/nexora-api";
 import { ApiError } from "@/lib/api";
@@ -30,7 +30,7 @@ export default function SalesPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -42,11 +42,7 @@ export default function SalesPage() {
     } finally {
       setLoading(false);
     }
-  }
 
-  useEffect(() => {
-    load();
-  }, [page, search]);
 
   const activeCount = items.filter((c) => c.isActive).length;
   const filteredCustomers = items.filter((c) => {
