@@ -286,10 +286,10 @@ export default function SalesOrdersPage() {
                             <span>{approvingId === order.id ? "Approving..." : "Approve"}</span>
                           </Button>
                         ) : order.status === "Approved" || order.status === "Invoiced" ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1F7A4D]">
-                            <CheckCircle2 size={13} />
-                            <span>Authorized</span>
-                          </span>
+                          <div className="inline-flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1F7A4D]"><CheckCircle2 size={13} /><span>{order.status === "Invoiced" ? "Billed" : "Authorized"}</span></span>
+                            <button onClick={() => openOrder(order)} className="inline-flex items-center gap-1 rounded-lg border border-[#D9E2DC] px-2.5 py-1.5 text-[11px] font-semibold text-[#234334] hover:bg-[#F4F7F5]"><Eye size={13} /> Open</button>
+                          </div>
                         ) : (
                           <button onClick={() => openOrder(order)} className="inline-flex items-center gap-1 rounded-lg border border-[#D9E2DC] px-2.5 py-1.5 text-[11px] font-semibold text-[#234334] hover:bg-[#F4F7F5]"><Eye size={13} /> Open</button>
                         )}
