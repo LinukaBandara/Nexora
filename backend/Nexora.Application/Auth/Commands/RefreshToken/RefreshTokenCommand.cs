@@ -55,6 +55,15 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, T
 
         var user = existing.User!;
 
+        // A deactivated account must not be able to mint a fresh access token
+        // from a refresh token that was issued before deactivation.
+        if (!user.IsActive || user.IsLockedOut)
+        {
+            existing.RevokedAt = DateTimeOffset.UtcNow;
+            await _db.SaveChangesAsync(cancellationToken);
+            throw new UnauthorizedAccessException("Refresh token is no longer valid.");
+        }
+
         var permissionCodes = await _db.UserRoles
             .IgnoreQueryFilters()
             .Where(ur => ur.UserId == user.Id)
