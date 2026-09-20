@@ -3,6 +3,7 @@ import { refreshTokens, setAuthCookies } from "@/lib/auth-refresh";
 import { demoResponse } from "@/lib/demo-data";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+const DEMO_MODE_ENABLED = process.env.NEXORA_DEMO_MODE === "true";
 
 async function callBackend(path: string[], search: string, method: string, body: string | undefined, accessToken: string | undefined) {
   const targetUrl = `${API_BASE_URL}/api/v1/${path.join("/")}${search}`;
@@ -21,7 +22,7 @@ async function handler(request: NextRequest, { params }: { params: Promise<{ pat
   const body = ["GET", "HEAD"].includes(method) ? undefined : await request.text();
   const search = request.nextUrl.search;
 
-  if (request.cookies.get("nexora_demo_mode")?.value === "1") {
+  if (DEMO_MODE_ENABLED && request.cookies.get("nexora_demo_mode")?.value === "1") {
     return NextResponse.json(demoResponse(path, search, method));
   }
 
