@@ -35,6 +35,7 @@ export default function InventoryPage() {
   useEffect(() => {
     setSearch(searchParams.get("search") ?? "");
     setPage(1);
+    if (searchParams.get("action") === "create") setIsCreateOpen(true);
   }, [searchParams]);
 
   async function load() {
