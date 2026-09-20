@@ -147,7 +147,7 @@ export default function FinancePage() {
           value={<MoneyDisplay amount={summary.income} />}
           variant="dark"
           tag="Revenue"
-          changeLabel="Cash in hand"
+          changeLabel="Period inflow"
           changeDirection="up"
         />
         <KpiCard
@@ -160,7 +160,7 @@ export default function FinancePage() {
         <KpiCard
           label="Net Cash Flow"
           value={<MoneyDisplay amount={summary.netCashFlow} />}
-          detail={summary.netCashFlow >= 0 ? "Positive operating surplus" : "Negative net flow"}
+          detail="Current-period net movement"
           changeLabel={summary.netCashFlow >= 0 ? "+ Surplus" : "- Deficit"}
           changeDirection={summary.netCashFlow >= 0 ? "up" : "down"}
         />
@@ -193,7 +193,7 @@ export default function FinancePage() {
                 </span>
               </div>
               <p className="mt-0.5 text-[12px] text-[#697B70]">
-                Weekly comparison of business cash inflows and procurement expenditures.
+                Illustrative weekly allocation of the current-period income and expense totals.
               </p>
             </div>
 
@@ -230,7 +230,7 @@ export default function FinancePage() {
               <h2 className="text-sm font-bold text-[#142019]">Balance Allocation</h2>
               <p className="mt-0.5 text-[12px] text-[#697B70]">Receivables vs. Payables</p>
             </div>
-            <StatusBadge label="Reconciled" tone="success" />
+            <StatusBadge label="Current mix" tone="neutral" />
           </div>
 
           <div className="mt-5 flex flex-1 items-center justify-center">
@@ -241,7 +241,7 @@ export default function FinancePage() {
               ]}
               size={180}
               thickness={36}
-              centerLabel="Net"
+              centerLabel="Receivable share"
               centerValue={`${receivableRatio}%`}
             />
           </div>
@@ -249,7 +249,7 @@ export default function FinancePage() {
           <div className="mt-4 rounded-xl border border-[#E3E9E5] bg-[#F9FAF9] p-3.5 text-xs text-[#526558]">
             <div className="font-semibold text-[#142019]">Liquid Margin Factor</div>
             <div className="mt-0.5 text-[11px] text-[#728479]">
-              Net ratio coverage exceeds 1.6x supplier liability requirements.
+              Receivables represent {receivableRatio}% of the combined receivable and payable balance.
             </div>
           </div>
         </div>
